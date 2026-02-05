@@ -22,6 +22,7 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 #include "bsp.h"
 
 /* USER CODE END Includes */
@@ -58,11 +59,10 @@
 
 /* External variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;
-extern CAN_HandleTypeDef hcan2;
 extern DMA_HandleTypeDef hdma_usart1_rx;
+extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart6_rx;
 extern DMA_HandleTypeDef hdma_usart6_tx;
-extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart6;
 /* USER CODE BEGIN EV */
 
@@ -80,7 +80,8 @@ void NMI_Handler(void)
 
   /* USER CODE END NonMaskableInt_IRQn 0 */
   /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
-  while (1) {
+   while (1)
+  {
   }
   /* USER CODE END NonMaskableInt_IRQn 1 */
 }
@@ -191,6 +192,64 @@ void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
 
+  // user_dbus_DR16 是大疆接收机的结构体（可以粗糙的理解为变量的文件夹）。
+  // 其中的变量有 ch0、ch1、ch2、ch3、roll、sw1、sw2
+  // 其中 ch0、ch1、ch2、ch3、roll 的取值范围是 -660到660
+  // 其中 sw1、sw2 可能的值为 1、2、3 。默认中间记得值是 1
+
+  // 舵电机控制
+  // 函数的第二个参数是目标角度，取值范围 0-8095，对应 0-360 度
+  DJI_Motor_Target(&PICH_GM6020, 3700.0700f - 3.0667f * 0.8f * (float) user_dbus_DR16.ch1);
+  if (user_dbus_DR16.sw2==1) {
+    DJI_Motor_Target(&LW_M3508, -5000);
+    DJI_Motor_Target(&RW_M3508, 5000);
+    if (user_dbus_DR16.sw1==1) {
+      DJI_Motor_Target(&TP_M2006, -400);
+    }else if (user_dbus_DR16.sw1==2) {
+      DJI_Motor_Target(&TP_M2006, -3000);
+    }else {
+      DJI_Motor_Target(&TP_M2006, 0);
+    }
+  }else if (user_dbus_DR16.sw2==2) {
+    DJI_Motor_Target(&TP_M2006, 400);
+    DJI_Motor_Target(&LW_M3508, -5000);
+    DJI_Motor_Target(&RW_M3508, 5000);
+  }else {
+    DJI_Motor_Target(&LW_M3508, 0);
+    DJI_Motor_Target(&RW_M3508, 0);
+  }
+  DJI_Motor_Execute(&user_can_1);
+
+  uint8_t user_can_2_send_frame[8] = {0};
+
+  user_can_2_send_frame [0] = (uint8_t) (user_dbus_DR16.ch2 >> 0);
+  user_can_2_send_frame [1] = (uint8_t) (user_dbus_DR16.ch2 >> 8);
+  user_can_2_send_frame [2] = (uint8_t) (user_dbus_DR16.ch3 >> 0);
+  user_can_2_send_frame [3] = (uint8_t) (user_dbus_DR16.ch3 >> 8);
+  user_can_2_send_frame [4] = (uint8_t) (user_dbus_DR16.ch0 >> 0);
+  user_can_2_send_frame [5] = (uint8_t) (user_dbus_DR16.ch0 >> 8);
+  user_can_2_send_frame [6] = (uint8_t) (user_dbus_DR16.ch1 >> 0);
+  user_can_2_send_frame [7] = (uint8_t) (user_dbus_DR16.ch1 >> 8);
+
+  CAN_Send(&user_can_2, Re_control_data_ID_1 , user_can_2_send_frame, 8);
+
+ 
+
+  // 发送轮电机控制报文
+
+  /*uint8_t C6x0_control_id_1_frame   [8] = {0};
+
+  C6x0_control_id_1_frame   [2 * 1 - 1] = (uint8_t) ((int16_t)( 10 * ch1) >> 0);
+  C6x0_control_id_1_frame   [2 * 1 - 2] = (uint8_t) ((int16_t)( 10 * ch1) >> 8);
+  C6x0_control_id_1_frame   [2 * 2 - 1] = (uint8_t) ((int16_t)( 10 * ch1) >> 0);
+  C6x0_control_id_1_frame   [2 * 2 - 2] = (uint8_t) ((int16_t)( 10 * ch1) >> 8);
+  C6x0_control_id_1_frame   [2 * 3 - 1] = (uint8_t) ((int16_t)( 10 * ch1) >> 0);
+  C6x0_control_id_1_frame   [2 * 3 - 2] = (uint8_t) ((int16_t)( 10 * ch1) >> 8);
+  C6x0_control_id_1_frame   [2 * 4 - 1] = (uint8_t) ((int16_t)(-10 * ch1) >> 0);
+  C6x0_control_id_1_frame   [2 * 4 - 2] = (uint8_t) ((int16_t)(-10 * ch1) >> 8);
+
+  CAN_Send(&user_can_1, C6x0_CURRENT_CONTROL_ID_1, C6x0_control_id_1_frame, 8);*/
+
   /* USER CODE END SysTick_IRQn 0 */
   HAL_IncTick();
   /* USER CODE BEGIN SysTick_IRQn 1 */
@@ -206,6 +265,20 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles DMA1 stream1 global interrupt.
+  */
+void DMA1_Stream1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream1_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart3_rx);
+  /* USER CODE BEGIN DMA1_Stream1_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream1_IRQn 1 */
+}
+
+/**
   * @brief This function handles CAN1 RX0 interrupts.
   */
 void CAN1_RX0_IRQHandler(void)
@@ -217,20 +290,6 @@ void CAN1_RX0_IRQHandler(void)
   /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
 
   /* USER CODE END CAN1_RX0_IRQn 1 */
-}
-
-/**
-  * @brief This function handles USART1 global interrupt.
-  */
-void USART1_IRQHandler(void)
-{
-  /* USER CODE BEGIN USART1_IRQn 0 */
-
-  /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
-  /* USER CODE BEGIN USART1_IRQn 1 */
-
-  /* USER CODE END USART1_IRQn 1 */
 }
 
 /**
@@ -259,20 +318,6 @@ void DMA2_Stream2_IRQHandler(void)
   /* USER CODE BEGIN DMA2_Stream2_IRQn 1 */
 
   /* USER CODE END DMA2_Stream2_IRQn 1 */
-}
-
-/**
-  * @brief This function handles CAN2 RX0 interrupts.
-  */
-void CAN2_RX0_IRQHandler(void)
-{
-  /* USER CODE BEGIN CAN2_RX0_IRQn 0 */
-
-  /* USER CODE END CAN2_RX0_IRQn 0 */
-  HAL_CAN_IRQHandler(&hcan2);
-  /* USER CODE BEGIN CAN2_RX0_IRQn 1 */
-
-  /* USER CODE END CAN2_RX0_IRQn 1 */
 }
 
 /**
