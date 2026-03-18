@@ -125,8 +125,10 @@ int main(void)
   CAN_Init(&user_can_2, &hcan2);
 
   // 初始化蜂鸣器 （用于播放启动音）
-  PWM_Init(&user_buzzer, &htim12, TIM_CHANNEL_1, 90000000);
-  PWM_Set_Duty(&user_buzzer, 0.5f);
+
+
+  PID_Init(&TP_M2006_Controller , 20.0f, 0.0f, 800.0f ,10000 ,0);
+  DJI_Motor_Init(&TP_M2006, &user_can_1, 1 , DJI_Motor_Get_Angle(&TP_M2006) , M2006 , Rotor_angle , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
 
 
   /* USER CODE END 2 */

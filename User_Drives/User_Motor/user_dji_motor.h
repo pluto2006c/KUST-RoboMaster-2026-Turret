@@ -7,6 +7,7 @@
 #include "user_motor.h"
 #include "../../Core/Inc/bsp_config.h"
 #include "../../User_Algorithm/User_Controller/user_controller.h"
+#include "../user_can.h"
 
 /* 宏定义 --------------------------------------------------------------------*/
 #define GM6020_CURRENT_CONTROL_ID_1   (0x1FE)

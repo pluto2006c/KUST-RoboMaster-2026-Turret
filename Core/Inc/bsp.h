@@ -4,6 +4,8 @@
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "main.h"
 #include "../../SEGGER_RTT/SEGGER_RTT.h"
+#include "../../User_Drives/User_Motor/user_dji_motor.h"
+#include "../../User_Algorithm/User_Controller/user_pid.h"
 
 /* 全局注册表 ----------------------------------------------------------------*/
 #define MAX_LOOP_EVENT 32
@@ -35,7 +37,8 @@ extern CAN_DRIVES user_can_2;
 
 // 蜂鸣器
 #include "../../User_Drives/user_pwm.h"
-extern PWM_DRIVES user_buzzer;
 
 
+extern PID_Controller TP_M2006_Controller;
+extern DJI_MOTOR_DRIVES TP_M2006;
 #endif // USER_BSP_H

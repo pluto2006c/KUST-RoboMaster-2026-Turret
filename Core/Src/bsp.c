@@ -33,3 +33,6 @@ CAN_DRIVES user_can_2 = {0};
 // 蜂鸣器
 PWM_DRIVES user_buzzer = {0};
 
+PID_Controller TP_M2006_Controller = {0};
+DJI_MOTOR_DRIVES TP_M2006 = {0};
+

@@ -192,29 +192,23 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-  // 播放启动音
-  if (user_buzzer.htim != NULL) {
-    static const uint16_t (*music)[3][2] = &dji_starting_music;
-    static const uint16_t note_num = sizeof(*music) / sizeof((*music)[0]);
-    static uint16_t note_index = 0;
-    static uint16_t time = 0;
-    static uint8_t start_sign = 0;
-    if (note_index < note_num || time > 0) {
-      if (time == 0) {
-        PWM_Set_Frequency(&user_buzzer, (*music)[note_index%note_num][0]);
-        time = (*music)[note_index%note_num][1];
-        note_index++;
-      }
-      else {
-        time--;
-      }
-    } else {
-      if (start_sign == 0) {
-        PWM_Set_Duty(&user_buzzer, 0);
-        start_sign = 1;
-      }
-    }
+  static int user_time_counyer = 0 ;
+
+  if (user_time_counyer > 1000) {
+    user_time_counyer = 0 ;
+  }else {
+    user_time_counyer ++ ;
   }
+
+
+
+  DJI_Motor_Execute(&user_can_1);
+
+
+  if (user_time_counyer % 10 == 0) {
+    DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 81.91));
+  }
+
 
 
 
