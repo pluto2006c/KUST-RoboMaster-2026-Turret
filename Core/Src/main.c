@@ -49,8 +49,11 @@ TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim12;
 
 UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart3;
 UART_HandleTypeDef huart6;
 DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart3_rx;
+DMA_HandleTypeDef hdma_usart3_tx;
 DMA_HandleTypeDef hdma_usart6_rx;
 DMA_HandleTypeDef hdma_usart6_tx;
 
@@ -68,6 +71,7 @@ static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_TIM12_Init(void);
 static void MX_TIM2_Init(void);
+static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -113,10 +117,12 @@ int main(void)
   MX_CAN2_Init();
   MX_TIM12_Init();
   MX_TIM2_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   JScope_Init(&htim2);
 
   UART_Init(&user_debug_uart, &huart6);
+  UART_Init(&vt03_uart, &huart3);
 
   LED_Init(&user_red_led, LED_RED_GPIO_Port, LED_RED_Pin, 1);
   LED_Init(&user_green_led, LED_GREEN_GPIO_Port, LED_GREEN_Pin, 1);
@@ -125,8 +131,15 @@ int main(void)
   CAN_Init(&user_can_2, &hcan2);
 
   // 初始化蜂鸣器 （用于播放启动音）
-  PWM_Init(&user_buzzer, &htim12, TIM_CHANNEL_1, 90000000);
-  PWM_Set_Duty(&user_buzzer, 0.5f);
+
+
+  PID_Init(&TP_M2006_Controller , 20.0f, 0.0f, 800.0f ,10000 ,0);
+  DJI_Motor_Init(&TP_M2006, &user_can_1, 1 , DJI_Motor_Get_Angle(&TP_M2006) , M2006 , Rotor_angle , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
+  PID_Init(&M3508_Controller , 20.0f, 0.0f, 800.0f ,10000 ,0);
+  DJI_Motor_Init(&RW_M3508, &user_can_1, 3 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&M3508_Controller);
+  DJI_Motor_Init(&LW_M3508, &user_can_1, 2 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
+  PID_Init(&GM_6020_Controller , 20.0f, 0.0f, 800.0f ,10000 ,0);
+  DJI_Motor_Init(&PICH_GM6020, &user_can_1, 2 , 3700.0700f , GM6020 , Rotor_angle , (CONTROLLER_INTERFACE*)&GM_6020_Controller);
 
 
   /* USER CODE END 2 */
@@ -401,6 +414,39 @@ static void MX_USART1_UART_Init(void)
 }
 
 /**
+  * @brief USART3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART3_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART3_Init 0 */
+
+  /* USER CODE END USART3_Init 0 */
+
+  /* USER CODE BEGIN USART3_Init 1 */
+
+  /* USER CODE END USART3_Init 1 */
+  huart3.Instance = USART3;
+  huart3.Init.BaudRate = 115200;
+  huart3.Init.WordLength = UART_WORDLENGTH_8B;
+  huart3.Init.StopBits = UART_STOPBITS_1;
+  huart3.Init.Parity = UART_PARITY_NONE;
+  huart3.Init.Mode = UART_MODE_TX_RX;
+  huart3.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart3.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART3_Init 2 */
+
+  /* USER CODE END USART3_Init 2 */
+
+}
+
+/**
   * @brief USART6 Initialization Function
   * @param None
   * @retval None
@@ -441,8 +487,15 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream1_IRQn);
+  /* DMA1_Stream3_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
   /* DMA2_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);

@@ -4,6 +4,8 @@
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "main.h"
 #include "../../SEGGER_RTT/SEGGER_RTT.h"
+#include "../../User_Drives/User_Motor/user_dji_motor.h"
+#include "../../User_Algorithm/User_Controller/user_pid.h"
 
 /* 全局注册表 ----------------------------------------------------------------*/
 #define MAX_LOOP_EVENT 32
@@ -22,6 +24,7 @@ extern CCMRAM uint8_t JScope_RTT_UpBuffer[BUFFER_SIZE_UP];
 // 调试串口
 #include "../../User_Drives/user_uart.h"
 extern UART_DRIVES user_debug_uart;
+extern UART_DRIVES vt03_uart;
 
 // 状态灯
 #include "../../User_Drives/user_led.h"
@@ -35,7 +38,18 @@ extern CAN_DRIVES user_can_2;
 
 // 蜂鸣器
 #include "../../User_Drives/user_pwm.h"
-extern PWM_DRIVES user_buzzer;
+
+//控制器注冊
+extern PID_Controller TP_M2006_Controller;
+extern PID_Controller M3508_Controller;
+extern PID_Controller GM_6020_Controller;
+
+//电机注册
+
+extern DJI_MOTOR_DRIVES TP_M2006;
+extern DJI_MOTOR_DRIVES LW_M3508;
+extern DJI_MOTOR_DRIVES RW_M3508;
+extern DJI_MOTOR_DRIVES PICH_GM6020;
 
 
 #endif // USER_BSP_H
