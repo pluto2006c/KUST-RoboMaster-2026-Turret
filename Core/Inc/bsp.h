@@ -6,6 +6,7 @@
 #include "../../SEGGER_RTT/SEGGER_RTT.h"
 #include "../../User_Drives/User_Motor/user_dji_motor.h"
 #include "../../User_Algorithm/User_Controller/user_pid.h"
+#include "../../User_Drives/user_dji_vt03.h"
 
 /* 全局注册表 ----------------------------------------------------------------*/
 #define MAX_LOOP_EVENT 32
@@ -20,6 +21,9 @@ extern CCMRAM JScope_Transmit_t jscope_transmit;
 extern CCMRAM uint8_t JScope_RTT_UpBuffer[BUFFER_SIZE_UP];
 
 /* 接口定义 ------------------------------------------------------------------*/
+
+/*底盘CAN地址注册--------------------------------------------------------------*/
+#define Re_control_data_ID_1          (0x200)
 
 // 调试串口
 #include "../../User_Drives/user_uart.h"
@@ -51,5 +55,7 @@ extern DJI_MOTOR_DRIVES LW_M3508;
 extern DJI_MOTOR_DRIVES RW_M3508;
 extern DJI_MOTOR_DRIVES PICH_GM6020;
 
+//遥控器注册
 
+extern VT03_DRIVES user_vt03;
 #endif // USER_BSP_H

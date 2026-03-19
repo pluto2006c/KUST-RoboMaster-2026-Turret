@@ -139,7 +139,7 @@ int main(void)
   DJI_Motor_Init(&RW_M3508, &user_can_1, 3 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&M3508_Controller);
   DJI_Motor_Init(&LW_M3508, &user_can_1, 2 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
   PID_Init(&GM_6020_Controller , 20.0f, 0.0f, 800.0f ,10000 ,0);
-  DJI_Motor_Init(&PICH_GM6020, &user_can_1, 2 , 3700.0700f , GM6020 , Rotor_angle , (CONTROLLER_INTERFACE*)&GM_6020_Controller);
+  DJI_Motor_Init(&PICH_GM6020, &user_can_1, 2 , 3700 , GM6020 , Rotor_angle , (CONTROLLER_INTERFACE*)&GM_6020_Controller);
 
 
   /* USER CODE END 2 */

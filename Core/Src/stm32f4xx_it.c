@@ -194,22 +194,98 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
+  //计时器
   static int user_time_counyer = 0 ;
-
-  if (user_time_counyer > 1000) {
+  if (user_time_counyer > 10000) {
     user_time_counyer = 0 ;
   }else {
     user_time_counyer ++ ;
   }
 
+  //热量管理
+  static uint8_t shoot_heat = 0 ;
+  if (user_time_counyer % 1000 == 0) {
+    if (shoot_heat <= 182) {
+      shoot_heat += 12 ;
+    }else {
+      shoot_heat = 200 ;
+    }
+  }
 
+  //模式控制
+
+  static uint8_t shoot_mode = 0 ;
+
+  if (shoot_mode == 0 || shoot_mode == 1) {
+    if (user_time_counyer % 10 == 0) {
+      DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 81.91));
+    }
+    if (DJI_Motor_Get_Speed(&TP_M2006) > 500)
+    {
+      shoot_mode = 1 ;
+    }
+  }
+
+  if (shoot_mode == 1 && DJI_Motor_Get_Speed(&TP_M2006) == 0) {
+    shoot_mode = 3 ;
+  }
+
+  //PICH轴控制
+  DJI_Motor_Set_State(&PICH_GM6020, 3700.0700f - 3.0667f * 0.8f * (float) user_vt03.ch1);
+
+  //发射机构控制
+  if (shoot_mode == 3)
+  {
+    //单发
+    if (user_vt03.mode_sw == 1){
+      DJI_Motor_Set_State(&RW_M3508, 7500);
+      DJI_Motor_Set_State(&LW_M3508, -7500);
+      if (user_vt03.trigger == 1) {
+        //发射频率计时
+        if (user_time_counyer % 1000 == 0 && shoot_heat <= 190 ) {
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 3.6*8191));
+        }
+      }
+    }
+    //连发
+    if (user_vt03.mode_sw == 2) {
+      DJI_Motor_Set_State(&RW_M3508, 7500);
+      DJI_Motor_Set_State(&LW_M3508, -7500);
+      if (user_vt03.trigger == 1) {
+        //发射频率计时
+        if (user_time_counyer % 33 == 0 && shoot_heat <= 190 ) {
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 3.6*8191));
+        }
+      }
+    }
+    if(user_vt03.mode_sw == 0)
+      DJI_Motor_Set_State(&RW_M3508, 0);
+      DJI_Motor_Set_State(&LW_M3508, 0);
+      DJI_Motor_Set_State(&TP_M2006, DJI_Motor_Get_Angle(&TP_M2006));{
+      }
+  }
 
   DJI_Motor_Execute(&user_can_1);
 
-
-  if (user_time_counyer % 10 == 0) {
-    DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 81.91));
+  //底盘通信
+  static uint16_t v = 0 ;
+  if (user_vt03.fn1 == 1) {
+    v = user_vt03.wheel;
   }
+
+  uint8_t user_can_2_send_frame[8] = {0};
+
+  user_can_2_send_frame [0] = (uint8_t) (user_vt03.ch3 >> 0);
+  user_can_2_send_frame [1] = (uint8_t) (user_vt03.ch3 >> 8);
+  user_can_2_send_frame [2] = (uint8_t) (user_vt03.ch2 >> 0);
+  user_can_2_send_frame [3] = (uint8_t) (user_vt03.ch2 >> 8);
+  user_can_2_send_frame [4] = (uint8_t) (v >> 0);
+  user_can_2_send_frame [5] = (uint8_t) (v >> 8);
+  user_can_2_send_frame [6] = (uint8_t) (user_vt03.ch0 >> 0);
+  user_can_2_send_frame [7] = (uint8_t) (user_vt03.ch0 >> 8);
+
+  CAN_Send(&user_can_2, Re_control_data_ID_1 , user_can_2_send_frame, 8);
+
 
 
 

@@ -18,6 +18,7 @@
 #define C6x0_CURRENT_CONTROL_ID_2     (0x1FF)
 #define C6x0_FEEDBACK_BASE_ID         (0x200)
 
+
 // 可以看到，大疆不同型号电调的 ID 可能存在冲突。
 // 其中 C610 电调和 C620 电调的 ID 全部一致。
 // 故统一定义为 C6x0 电调。
