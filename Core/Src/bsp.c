@@ -21,7 +21,6 @@ uint8_t JScope_RTT_UpBuffer[BUFFER_SIZE_UP] = {0};
 
 // 调试串口
 UART_DRIVES user_debug_uart = {0};
-UART_DRIVES vt03_uart = {0};
 // 状态灯
 LED_DRIVES user_red_led = {0};
 LED_DRIVES user_green_led = {0};
@@ -46,4 +45,5 @@ DJI_MOTOR_DRIVES RW_M3508 = {0};
 DJI_MOTOR_DRIVES PICH_GM6020 = {0};
 
 //遥控器注册
+UART_DRIVES vt03_uart = {0};
 VT03_DRIVES user_vt03 = {0};

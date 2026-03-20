@@ -4,7 +4,6 @@
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "main.h"
 #include "user_uart.h"
-#include "bsp_config.h"
 #include <stdbool.h>
 
 /* 常量定义 ------------------------------------------------------------------*/
@@ -68,7 +67,10 @@ typedef struct {
     uint8_t mouse_middle;      // 鼠标中键
     
     // 键盘数据
-    uint16_t key_value;        // 键盘按键值(位掩码)
+    uint16_t key_value;
+
+    //接收串口
+    UART_DRIVES user_uart;
 } VT03_DRIVES;
 
 /* 函数声明 ------------------------------------------------------------------*/
@@ -81,5 +83,6 @@ uint8_t VT03_IsKeyboardDown(const Keyboard keyboard);
 
 // 数据验证函数
 uint8_t VT03_VerifyCRC16(uint8_t* p_msg, uint16_t len);
+
 
 #endif //__USER_DJI_VTO3_H__

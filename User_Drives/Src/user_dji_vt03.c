@@ -6,7 +6,7 @@
 /* 私有变量 ------------------------------------------------------------------*/
 static VT03_DRIVES* vt03_drive = NULL;
 
-UART_DRIVES vt03_uart = {0};
+
 uint8_t buf[DJI_VT03_BUFFLEN] = {0};
 
 
@@ -120,7 +120,7 @@ static void VT03_UartCallback(void* user_uart) {
     const char head[3] = {DJI_VT03_SOF_1, DJI_VT03_SOF_2, 0x00};
 
     // 从环形缓冲区获取数据
-    if (!UART_GetDataWithHLen(&vt03_uart, buf, head, DJI_VT03_BUFFLEN)) {
+    if (!UART_GetDataWithHLen(user_uart, buf, head, DJI_VT03_BUFFLEN)) {
         return;
     }
 
@@ -148,7 +148,7 @@ static void VT03_UartCallback(void* user_uart) {
  * @brief 初始化DJI VT03遥控器
  * @param vt03 VT03驱动结构体指针
  */
-void DJI_VT03_Init(VT03_DRIVES* vt03) {
-    vt03_drive = vt03;
-	UART_RegisterCallback(&vt03_uart, VT03_UartCallback);
+void DJI_VT03_Init(VT03_DRIVES* User_vt03) {
+    vt03_drive = User_vt03;
+	UART_RegisterCallback(&User_vt03->user_uart, VT03_UartCallback);
 }

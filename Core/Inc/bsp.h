@@ -28,7 +28,6 @@ extern CCMRAM uint8_t JScope_RTT_UpBuffer[BUFFER_SIZE_UP];
 // 调试串口
 #include "../../User_Drives/user_uart.h"
 extern UART_DRIVES user_debug_uart;
-extern UART_DRIVES vt03_uart;
 
 // 状态灯
 #include "../../User_Drives/user_led.h"
@@ -56,6 +55,6 @@ extern DJI_MOTOR_DRIVES RW_M3508;
 extern DJI_MOTOR_DRIVES PICH_GM6020;
 
 //遥控器注册
-
+extern UART_DRIVES vt03_uart;
 extern VT03_DRIVES user_vt03;
 #endif // USER_BSP_H
