@@ -264,6 +264,13 @@ void SysTick_Handler(void)
       DJI_Motor_Set_State(&TP_M2006, DJI_Motor_Get_Angle(&TP_M2006));{
       }
   }
+  //测试代码
+  if (user_vt03.trigger == 1) {
+    //发射频率计时
+    if (user_time_counyer % 33 == 0 && shoot_heat <= 190 ) {
+      DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 3.6*8191));
+    }
+  }
 
   DJI_Motor_Execute(&user_can_1);
 
