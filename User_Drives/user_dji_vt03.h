@@ -81,8 +81,5 @@ void DJI_VT03_Init(VT03_DRIVES* vt03);
 // 键盘查询函数
 uint8_t VT03_IsKeyboardDown(const Keyboard keyboard);
 
-// 数据验证函数
-uint8_t VT03_VerifyCRC16(uint8_t* p_msg, uint16_t len);
-
 
 #endif //__USER_DJI_VTO3_H__

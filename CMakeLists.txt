@@ -55,7 +55,9 @@ add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F427xx -DARM_MATH_CM4 -D__FPU_PR
 
 file(GLOB_RECURSE SOURCES "User_Drives/*.*" "User_Algorithm/*.*" "User_Status/*.*" "User_Architect/*.*" "User_Application/*.*" "SEGGER_RTT/*.*" "User_Lib/*.*" "Core/*.*" "Drivers/*.*")
 
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F427IIHX_FLASH.ld)
+set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F427IIHX_FLASH.ld
+        User_Drives/Src/user_HWT906.c
+        User_Drives/user_HWT906.h)
 
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
 add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)
