@@ -227,14 +227,14 @@ void SysTick_Handler(void)
   }
 
   if (shoot_mode == 1 && DJI_Motor_Get_Speed(&TP_M2006) == 0) {
-    shoot_mode = 3 ;
+    shoot_mode = 2 ;
   }
 
   //PICH轴控制
   DJI_Motor_Set_State(&PICH_GM6020, 3700.0700f - 3.0667f * 0.8f * (float) user_vt03.ch1);
 
   //发射机构控制
-  if (shoot_mode == 3)
+  if (shoot_mode == 2)
   {
     //单发
     if (user_vt03.mode_sw == 1){

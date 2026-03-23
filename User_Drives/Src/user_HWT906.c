@@ -3,7 +3,7 @@
 
 /* 私有变量 ------------------------------------------------------------------*/
 static HWT906_DRIVES* HWT906_drive = NULL;  /* HWT906 驱动结构体指针 */
-uint8_t buf[HWT906_BUFFLEN] = {0};           /* 数据缓冲区 */
+static uint8_t buf[HWT906_BUFFLEN] = {0};           /* 数据缓冲区 */
 
 /* 函数体 --------------------------------------------------------------------*/
 
@@ -14,7 +14,7 @@ uint8_t buf[HWT906_BUFFLEN] = {0};           /* 数据缓冲区 */
 * @param len  数据长度
 * @return 校验和
 */
-char Get_SUMCRC(HWT906_TYPE type, uint8_t* data, uint8_t len) {
+static char Get_SUMCRC(HWT906_TYPE type, uint8_t* data, uint8_t len) {
     char sum = 0;
     sum += type;
     for (uint8_t i = 0; i < len - 1; i++) {
@@ -68,6 +68,11 @@ static void HWT906_UartCallback(void* user_uart) {
             break;
     }
 }
+
+void HWT906_Control(HWT906_DRIVES* User_HWT906) {
+
+}
+
 
 /**
 * @brief 初始化 HWT906

@@ -7,7 +7,7 @@
 static VT03_DRIVES* vt03_drive = NULL;
 
 
-uint8_t buf[DJI_VT03_BUFFLEN] = {0};
+static uint8_t buf[DJI_VT03_BUFFLEN] = {0};
 
 
 
