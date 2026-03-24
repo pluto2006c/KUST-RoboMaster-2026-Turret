@@ -23,6 +23,8 @@
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
+extern DMA_HandleTypeDef hdma_uart8_rx;
+
 extern DMA_HandleTypeDef hdma_usart1_rx;
 
 extern DMA_HandleTypeDef hdma_usart3_rx;
@@ -328,7 +330,50 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(huart->Instance==USART1)
+  if(huart->Instance==UART8)
+  {
+    /* USER CODE BEGIN UART8_MspInit 0 */
+
+    /* USER CODE END UART8_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_UART8_CLK_ENABLE();
+
+    __HAL_RCC_GPIOE_CLK_ENABLE();
+    /**UART8 GPIO Configuration
+    PE1     ------> UART8_TX
+    PE0     ------> UART8_RX
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_1|GPIO_PIN_0;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF8_UART8;
+    HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+
+    /* UART8 DMA Init */
+    /* UART8_RX Init */
+    hdma_uart8_rx.Instance = DMA1_Stream6;
+    hdma_uart8_rx.Init.Channel = DMA_CHANNEL_5;
+    hdma_uart8_rx.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_uart8_rx.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_uart8_rx.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_uart8_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+    hdma_uart8_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
+    hdma_uart8_rx.Init.Mode = DMA_NORMAL;
+    hdma_uart8_rx.Init.Priority = DMA_PRIORITY_LOW;
+    hdma_uart8_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    if (HAL_DMA_Init(&hdma_uart8_rx) != HAL_OK)
+    {
+      Error_Handler();
+    }
+
+    __HAL_LINKDMA(huart,hdmarx,hdma_uart8_rx);
+
+    /* USER CODE BEGIN UART8_MspInit 1 */
+
+    /* USER CODE END UART8_MspInit 1 */
+  }
+  else if(huart->Instance==USART1)
   {
     /* USER CODE BEGIN USART1_MspInit 0 */
 
@@ -443,17 +488,17 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     /* Peripheral clock enable */
     __HAL_RCC_USART6_CLK_ENABLE();
 
-    __HAL_RCC_GPIOG_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
     /**USART6 GPIO Configuration
-    PG14     ------> USART6_TX
-    PG9     ------> USART6_RX
+    PC7     ------> USART6_RX
+    PC6     ------> USART6_TX
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_14|GPIO_PIN_9;
+    GPIO_InitStruct.Pin = GPIO_PIN_7|GPIO_PIN_6;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF8_USART6;
-    HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
     /* USART6 DMA Init */
     /* USART6_RX Init */
@@ -510,7 +555,27 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
   */
 void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 {
-  if(huart->Instance==USART1)
+  if(huart->Instance==UART8)
+  {
+    /* USER CODE BEGIN UART8_MspDeInit 0 */
+
+    /* USER CODE END UART8_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_UART8_CLK_DISABLE();
+
+    /**UART8 GPIO Configuration
+    PE1     ------> UART8_TX
+    PE0     ------> UART8_RX
+    */
+    HAL_GPIO_DeInit(GPIOE, GPIO_PIN_1|GPIO_PIN_0);
+
+    /* UART8 DMA DeInit */
+    HAL_DMA_DeInit(huart->hdmarx);
+    /* USER CODE BEGIN UART8_MspDeInit 1 */
+
+    /* USER CODE END UART8_MspDeInit 1 */
+  }
+  else if(huart->Instance==USART1)
   {
     /* USER CODE BEGIN USART1_MspDeInit 0 */
 
@@ -563,10 +628,10 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     __HAL_RCC_USART6_CLK_DISABLE();
 
     /**USART6 GPIO Configuration
-    PG14     ------> USART6_TX
-    PG9     ------> USART6_RX
+    PC7     ------> USART6_RX
+    PC6     ------> USART6_TX
     */
-    HAL_GPIO_DeInit(GPIOG, GPIO_PIN_14|GPIO_PIN_9);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_7|GPIO_PIN_6);
 
     /* USART6 DMA DeInit */
     HAL_DMA_DeInit(huart->hdmarx);

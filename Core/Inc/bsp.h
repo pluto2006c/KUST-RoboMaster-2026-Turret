@@ -7,6 +7,7 @@
 #include "../../User_Drives/User_Motor/user_dji_motor.h"
 #include "../../User_Algorithm/User_Controller/user_pid.h"
 #include "../../User_Drives/user_dji_vt03.h"
+#include "../../User_Drives/user_hwt906.h"
 
 /* 全局注册表 ----------------------------------------------------------------*/
 #define MAX_LOOP_EVENT 32
@@ -23,7 +24,8 @@ extern CCMRAM uint8_t JScope_RTT_UpBuffer[BUFFER_SIZE_UP];
 /* 接口定义 ------------------------------------------------------------------*/
 
 /*底盘CAN地址注册--------------------------------------------------------------*/
-#define Re_control_data_ID_1          (0x200)
+#define Chassis_data_ID_1          (0x200)
+#define Chassis_data_ID_2          (0x201)
 
 // 调试串口
 #include "../../User_Drives/user_uart.h"
@@ -57,4 +59,9 @@ extern DJI_MOTOR_DRIVES PICH_GM6020;
 //遥控器注册
 extern UART_DRIVES vt03_uart;
 extern VT03_DRIVES user_vt03;
+
+//陀螺仪注册
+extern UART_DRIVES hwt906_uart;
+extern HWT906_DRIVES user_HWT906;
+
 #endif // USER_BSP_H

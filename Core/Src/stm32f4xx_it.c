@@ -22,6 +22,8 @@
 #include "stm32f4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <sys/types.h>
+
 #include "bsp.h"
 #include "../../User_Lib/user_music.h"
 
@@ -61,6 +63,7 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 extern TIM_HandleTypeDef htim2;
+extern DMA_HandleTypeDef hdma_uart8_rx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
@@ -196,7 +199,9 @@ void SysTick_Handler(void)
   /* USER CODE BEGIN SysTick_IRQn 0 */
   //计时器
   static int user_time_counyer = 0 ;
-  if (user_time_counyer > 10000) {
+  uint8_t back_time_flag = 0 ;
+
+  if (user_time_counyer == 1000) {
     user_time_counyer = 0 ;
   }else {
     user_time_counyer ++ ;
@@ -213,7 +218,6 @@ void SysTick_Handler(void)
   }
 
   //模式控制
-
   static uint8_t shoot_mode = 0 ;
 
   if (shoot_mode == 0 || shoot_mode == 1) {
@@ -226,51 +230,65 @@ void SysTick_Handler(void)
     }
   }
 
-  if (shoot_mode == 1 && DJI_Motor_Get_Speed(&TP_M2006) == 0) {
+  if (shoot_mode == 1 && DJI_Motor_Get_Speed(&TP_M2006) < 50) {
     shoot_mode = 2 ;
   }
 
+  if (shoot_mode == 2) {
+    DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1152.0f));
+    shoot_mode = 3 ;
+  }
+
   //PICH轴控制
-  DJI_Motor_Set_State(&PICH_GM6020, 3700.0700f - 3.0667f * 0.8f * (float) user_vt03.ch1);
+  DJI_Motor_Set_State(&PICH_GM6020, 0);
 
   //发射机构控制
-  if (shoot_mode == 2)
-  {
-    //单发
-    if (user_vt03.mode_sw == 1){
-      DJI_Motor_Set_State(&RW_M3508, 7500);
-      DJI_Motor_Set_State(&LW_M3508, -7500);
-      if (user_vt03.trigger == 1) {
-        //发射频率计时
-        if (user_time_counyer % 1000 == 0 && shoot_heat <= 190 ) {
-          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 3.6*8191));
+  if (shoot_mode == 3){
+      //单发
+      if (user_vt03.mode_sw == 1){
+        DJI_Motor_Set_State(&RW_M3508, 7500);
+        DJI_Motor_Set_State(&LW_M3508, -7500);
+        if (user_vt03.trigger == 1) {
+          //发射频率计时
+          if (user_time_counyer % 1000 == 0 && shoot_heat >= 10 ) {
+            DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
+            shoot_heat -= 10 ;
+          }
+          //反转
+          if (user_vt03.fn2 == 1) {
+            DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 1296.0f));
+            back_time_flag = user_time_counyer ;
+            if (user_time_counyer - back_time_flag > 100)
+              DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
+          }
         }
       }
-    }
-    //连发
-    if (user_vt03.mode_sw == 2) {
-      DJI_Motor_Set_State(&RW_M3508, 7500);
-      DJI_Motor_Set_State(&LW_M3508, -7500);
-      if (user_vt03.trigger == 1) {
-        //发射频率计时
-        if (user_time_counyer % 33 == 0 && shoot_heat <= 190 ) {
-          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 3.6*8191));
+      //连发
+      if (user_vt03.mode_sw == 2) {
+        DJI_Motor_Set_State(&RW_M3508, 7500);
+        DJI_Motor_Set_State(&LW_M3508, -7500);
+        if (user_vt03.trigger == 1) {
+          //发射频率计时
+          if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {
+            DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
+            shoot_heat -= 10 ;
+          }
+        }
+        //反转
+        if (user_vt03.fn2 == 1) {
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 1296.0f));
+          back_time_flag = user_time_counyer ;
+          if (user_time_counyer - back_time_flag > 100)
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
         }
       }
-    }
-    if(user_vt03.mode_sw == 0)
-      DJI_Motor_Set_State(&RW_M3508, 0);
-      DJI_Motor_Set_State(&LW_M3508, 0);
-      DJI_Motor_Set_State(&TP_M2006, DJI_Motor_Get_Angle(&TP_M2006));{
+      if(user_vt03.mode_sw == 0){
+        DJI_Motor_Set_State(&RW_M3508, 0);
+        DJI_Motor_Set_State(&LW_M3508, 0);
+        DJI_Motor_Set_State(&TP_M2006, DJI_Motor_Get_Angle(&TP_M2006));
       }
   }
-  //测试代码
-  if (user_vt03.trigger == 1) {
-    //发射频率计时
-    if (user_time_counyer % 33 == 0 && shoot_heat <= 190 ) {
-      DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 3.6*8191));
-    }
-  }
+
 
   DJI_Motor_Execute(&user_can_1);
 
@@ -280,18 +298,31 @@ void SysTick_Handler(void)
     v = user_vt03.wheel;
   }
 
-  uint8_t user_can_2_send_frame[8] = {0};
+  uint8_t user_can_2_send_frame_1[8] = {0};
 
-  user_can_2_send_frame [0] = (uint8_t) (user_vt03.ch3 >> 0);
-  user_can_2_send_frame [1] = (uint8_t) (user_vt03.ch3 >> 8);
-  user_can_2_send_frame [2] = (uint8_t) (user_vt03.ch2 >> 0);
-  user_can_2_send_frame [3] = (uint8_t) (user_vt03.ch2 >> 8);
-  user_can_2_send_frame [4] = (uint8_t) (v >> 0);
-  user_can_2_send_frame [5] = (uint8_t) (v >> 8);
-  user_can_2_send_frame [6] = (uint8_t) (user_vt03.ch0 >> 0);
-  user_can_2_send_frame [7] = (uint8_t) (user_vt03.ch0 >> 8);
+  user_can_2_send_frame_1 [0] = (uint8_t) (user_vt03.ch3 >> 0);
+  user_can_2_send_frame_1 [1] = (uint8_t) (user_vt03.ch3 >> 8);
+  user_can_2_send_frame_1 [2] = (uint8_t) (user_vt03.ch2 >> 0);
+  user_can_2_send_frame_1 [3] = (uint8_t) (user_vt03.ch2 >> 8);
+  user_can_2_send_frame_1 [4] = (uint8_t) (v >> 0);
+  user_can_2_send_frame_1 [5] = (uint8_t) (v >> 8);
+  user_can_2_send_frame_1 [6] = (uint8_t) (user_vt03.ch0 >> 0);
+  user_can_2_send_frame_1 [7] = (uint8_t) (user_vt03.ch0 >> 8);
 
-  CAN_Send(&user_can_2, Re_control_data_ID_1 , user_can_2_send_frame, 8);
+  CAN_Send(&user_can_2, Chassis_data_ID_1 , user_can_2_send_frame_1, 8);
+
+  uint8_t user_can_2_send_frame_2[8] = {0};
+
+  user_can_2_send_frame_2 [0] = (uint8_t) (user_HWT906.user_angular_velocity.angular_velocity_z >> 0);
+  user_can_2_send_frame_2 [1] = (uint8_t) (user_HWT906.user_angular_velocity.angular_velocity_z >> 8);
+  user_can_2_send_frame_2 [2] = (uint8_t) (user_HWT906.user_angle.angle_z >> 0);
+  user_can_2_send_frame_2 [3] = (uint8_t) (user_HWT906.user_angle.angle_z >> 8);
+  user_can_2_send_frame_2 [4] = (uint8_t) (user_HWT906.user_acceleration.acceleration_x>> 0);
+  user_can_2_send_frame_2 [5] = (uint8_t) (user_HWT906.user_acceleration.acceleration_x>> 8);
+  user_can_2_send_frame_2 [6] = (uint8_t) (user_HWT906.user_acceleration.acceleration_y >> 0);
+  user_can_2_send_frame_2 [7] = (uint8_t) (user_HWT906.user_acceleration.acceleration_y >> 8);
+
+  CAN_Send(&user_can_2, Chassis_data_ID_2 , user_can_2_send_frame_2, 8);
 
 
 
@@ -337,6 +368,20 @@ void DMA1_Stream3_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Stream3_IRQn 1 */
 
   /* USER CODE END DMA1_Stream3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 stream6 global interrupt.
+  */
+void DMA1_Stream6_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream6_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_uart8_rx);
+  /* USER CODE BEGIN DMA1_Stream6_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream6_IRQn 1 */
 }
 
 /**
