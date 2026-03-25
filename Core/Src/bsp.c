@@ -35,7 +35,8 @@ PWM_DRIVES user_buzzer = {0};
 // 控制器注冊
 
 PID_Controller TP_M2006_Controller = {0};
-PID_Controller M3508_Controller = {0};
+PID_Controller RW_M3508_Controller = {0};
+PID_Controller LW_M3508_Controller = {0};
 PID_Controller GM_6020_Controller = {0};
 
 // 电机注册

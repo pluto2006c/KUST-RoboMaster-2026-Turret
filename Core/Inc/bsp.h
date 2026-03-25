@@ -46,7 +46,8 @@ extern CAN_DRIVES user_can_2;
 
 //控制器注冊
 extern PID_Controller TP_M2006_Controller;
-extern PID_Controller M3508_Controller;
+extern PID_Controller LW_M3508_Controller;
+extern PID_Controller RW_M3508_Controller;
 extern PID_Controller GM_6020_Controller;
 
 //电机注册
