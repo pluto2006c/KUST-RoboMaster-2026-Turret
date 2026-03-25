@@ -243,38 +243,53 @@ void SysTick_Handler(void)
   DJI_Motor_Set_State(&PICH_GM6020,  3.0667f * 0.8f * (float) user_vt03.ch1);
 
   //发射机构控制
-  if (shoot_mode == 3){
-     //单发
-     if (user_vt03.mode_sw == 1){
-       DJI_Motor_Set_State(&RW_M3508, 6800);
-       DJI_Motor_Set_State(&LW_M3508, -6800);
-       if (user_vt03.trigger == 1) {
-         //发射频率计时
-         if (user_time_counyer % 1000 == 0 && shoot_heat >= 10 ) {
-           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
-           shoot_heat -= 10 ;
-         }
-       }
-     }
-     //连发
-     if (user_vt03.mode_sw == 2) {
-       DJI_Motor_Set_State(&RW_M3508, 6800);
-       DJI_Motor_Set_State(&LW_M3508, -6800);
-       if (user_vt03.trigger == 1) {
-         //发射频率计时
-         if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {
-           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
-           shoot_heat -= 10 ;
-         }
-       }
-     }
-     if(user_vt03.mode_sw == 0){
-       DJI_Motor_Set_State(&RW_M3508, 0);
-       DJI_Motor_Set_State(&LW_M3508, 0);
-       DJI_Motor_Set_State(&TP_M2006, DJI_Motor_Get_Angle(&TP_M2006));
-     }
+  if (shoot_mode == 3) {
+    //单发
+    if (user_vt03.mode_sw == 1){
+      DJI_Motor_Set_State(&RW_M3508, 6800);
+      DJI_Motor_Set_State(&LW_M3508, -6800);
+      if (user_vt03.trigger == 1) {
+        //发射频率计时
+        if (user_time_counyer % 1000 == 0 && shoot_heat >= 10 ) {
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
+          shoot_heat -= 10 ;
+        }
+        //反转
+        if (user_vt03.fn2 == 1) {
+          back_time_flag = user_time_counyer;
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 273.0f));
+          if (user_time_counyer - back_time_flag >= 300) {
+            DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 273.0f));
+          }
+        }
+      }
+      //连发
+      if (user_vt03.mode_sw == 2) {
+        DJI_Motor_Set_State(&RW_M3508, 6800);
+        DJI_Motor_Set_State(&LW_M3508, -6800);
+        if (user_vt03.trigger == 1) {
+          //发射频率计时
+          if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {
+            DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
+            shoot_heat -= 10 ;
+          }
+        }
+        //反转
+        if (user_vt03.fn2 == 1) {
+          back_time_flag = user_time_counyer;
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 273.0f));
+          if (user_time_counyer - back_time_flag >= 300) {
+            DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 273.0f));
+          }
+        }
+      }
+      if(user_vt03.mode_sw == 0){
+        DJI_Motor_Set_State(&RW_M3508, 0);
+        DJI_Motor_Set_State(&LW_M3508, 0);
+        DJI_Motor_Set_State(&TP_M2006, DJI_Motor_Get_Angle(&TP_M2006));
+      }
+    }
   }
-
 
   DJI_Motor_Execute(&user_can_1);
 

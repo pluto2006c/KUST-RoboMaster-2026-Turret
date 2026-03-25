@@ -140,7 +140,7 @@ int main(void)
   DJI_VT03_Init(&user_vt03 , &vt03_uart);
 
   //陀螺仪初始化
-  HWT906_Init(&user_HWT906);
+  HWT906_Init(&user_HWT906 ,&hwt906_uart);
 
   // 初始化蜂鸣器 （用于播放启动音）
 

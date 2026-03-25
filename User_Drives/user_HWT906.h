@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct {
     //串口驱动结构体
-    UART_DRIVES user_uart;
+    UART_DRIVES* user_uart;
     //陀螺仪数据
     ACCELERATION user_acceleration;  // 加速度数据
     ANGULAR_VELOCITY user_angular_velocity;  // 角速度数据
@@ -52,7 +52,7 @@ typedef enum {
 
 /* 函数声明 ------------------------------------------------------------------*/
 
-void HWT906_Init(HWT906_DRIVES* user_HWT906);
+void HWT906_Init(HWT906_DRIVES* User_HWT906 , UART_DRIVES* user_hwt906);
 
 
 #endif //DJI_A_BOARD_USER_HWT906_H

@@ -78,8 +78,9 @@ void HWT906_Control(HWT906_DRIVES* User_HWT906) {
 * @brief 初始化 HWT906
 * @param User_HWT906 HWT906 驱动结构体指针
 */
-void HWT906_Init(HWT906_DRIVES* User_HWT906) {
+void HWT906_Init(HWT906_DRIVES* User_HWT906 , UART_DRIVES* user_hwt906) {
     HWT906_drive = User_HWT906;
+    User_HWT906->user_uart = user_hwt906;
     /* 注册串口回调函数 */
-    UART_RegisterCallback(&User_HWT906->user_uart, HWT906_UartCallback);
+    UART_RegisterCallback(User_HWT906->user_uart, HWT906_UartCallback);
 }
