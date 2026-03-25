@@ -70,13 +70,13 @@ typedef struct {
     uint16_t key_value;
 
     //接收串口
-    UART_DRIVES user_uart;
+    UART_DRIVES* user_uart;
 } VT03_DRIVES;
 
 /* 函数声明 ------------------------------------------------------------------*/
 
 // 初始化函数
-void DJI_VT03_Init(VT03_DRIVES* vt03);
+void DJI_VT03_Init(VT03_DRIVES* User_vt03 , UART_DRIVES* User_uart);
 
 // 键盘查询函数
 uint8_t VT03_IsKeyboardDown(const Keyboard keyboard);

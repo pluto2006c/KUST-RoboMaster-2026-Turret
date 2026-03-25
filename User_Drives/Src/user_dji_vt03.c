@@ -148,7 +148,8 @@ static void VT03_UartCallback(void* user_uart) {
  * @brief 初始化DJI VT03遥控器
  * @param vt03 VT03驱动结构体指针
  */
-void DJI_VT03_Init(VT03_DRIVES* User_vt03) {
+void DJI_VT03_Init(VT03_DRIVES* User_vt03 , UART_DRIVES* User_uart) {
     vt03_drive = User_vt03;
-	UART_RegisterCallback(&User_vt03->user_uart, VT03_UartCallback);
+	User_vt03->user_uart = User_uart;
+	UART_RegisterCallback(User_vt03->user_uart, VT03_UartCallback);
 }
