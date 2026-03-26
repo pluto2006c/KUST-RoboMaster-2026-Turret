@@ -52,3 +52,7 @@ VT03_DRIVES user_vt03 = {0};
 //陀螺仪注册
 UART_DRIVES hwt906_uart = {0};
 HWT906_DRIVES user_HWT906 = {0};
+
+//电脑注册
+UART_DRIVES PC_uart = {0};
+PC_DRIVES user_PC = {0};

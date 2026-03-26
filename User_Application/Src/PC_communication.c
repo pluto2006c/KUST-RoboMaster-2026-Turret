@@ -1,0 +1,39 @@
+/* 包含头文件 ----------------------------------------------------------------*/
+#include "../../User_Application/PC_communication.h"
+
+/* 私有变量 ------------------------------------------------------------------*/
+static PC_DRIVES* user_PC_drive = NULL;  /* HWT906 驱动结构体指针 */
+static uint8_t buf[PC_BUFFLEN] = {0};           /* 数据缓冲区 */
+
+/* 函数体 --------------------------------------------------------------------*/
+
+
+/**
+* @brief PC 串口回调函数
+* @param user_uart 串口驱动结构体指针
+*/
+static void PC_UartCallback(void* user_uart) {
+    UART_DRIVES* uart = (UART_DRIVES*)user_uart;
+    char buffer_head[2] = { 0xEB, 0x90 } ;
+
+    /* 获取串口数据 */
+    if (!UART_GetDataWithHLen(user_uart, buf, buffer_head , PC_BUFFLEN)) {
+        return;
+    }
+    user_PC_drive -> holder_pitch = (float)(buf[2] | (uint32_t)(buf[3] << 8) | (uint32_t)(buf[4] << 16) | (uint32_t)(buf[5] << 24));
+    user_PC_drive -> holder_yaw  = (float)(buf[6] | (uint32_t)(buf[7] << 8) | (uint32_t)(buf[8] << 16) | (uint32_t)(buf[9] << 24));
+    user_PC_drive -> shoot_delay= (float)(buf[10] | (uint16_t)(buf[11] << 8));
+
+
+}
+
+/**
+* @brief 初始化 HWT906
+* @param User_PC HWT906 驱动结构体指针
+*/
+void PC_Init(PC_DRIVES* User_PC , UART_DRIVES* PC) {
+    user_PC_drive = User_PC;
+    User_PC->user_uart = PC;
+    /* 注册串口回调函数 */
+    UART_RegisterCallback(User_PC->user_uart, PC_UartCallback);
+}

@@ -48,6 +48,7 @@ CAN_HandleTypeDef hcan2;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim12;
 
+UART_HandleTypeDef huart7;
 UART_HandleTypeDef huart8;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart3;
@@ -75,6 +76,7 @@ static void MX_TIM12_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_UART8_Init(void);
+static void MX_UART7_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -122,12 +124,14 @@ int main(void)
   MX_TIM2_Init();
   MX_USART3_UART_Init();
   MX_UART8_Init();
+  MX_UART7_Init();
   /* USER CODE BEGIN 2 */
   JScope_Init(&htim2);
 
   //串口初始化
   UART_Init(&user_debug_uart, &huart6);
   UART_Init(&vt03_uart, &huart3);
+  UART_Init(&PC_uart, &huart7);
   UART_Init(&hwt906_uart, &huart8);
 
   LED_Init(&user_red_led, LED_RED_GPIO_Port, LED_RED_Pin, 1);
@@ -142,16 +146,17 @@ int main(void)
   //陀螺仪初始化
   HWT906_Init(&user_HWT906 ,&hwt906_uart);
 
-  // 初始化蜂鸣器 （用于播放启动音）
+  //PC串口初始化
+
 
 
   PID_Init(&TP_M2006_Controller , 10.0f, 0.0f, 400.0f ,10000 ,0);
-  DJI_Motor_Init(&TP_M2006, &user_can_1, 1 , DJI_Motor_Get_Angle(&TP_M2006) , M2006 , Rotor_angle , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
+  DJI_Motor_Init(&TP_M2006, &user_can_1, 4 , DJI_Motor_Get_Angle(&TP_M2006) , M2006 , Rotor_angle , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
   PID_Init(&RW_M3508_Controller , 20.0f, 0.0f, 5.0f ,10000 ,0);
   PID_Init(&LW_M3508_Controller , 20.0f, 0.0f, 5.0f ,10000 ,0);
   DJI_Motor_Init(&RW_M3508, &user_can_1, 3 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&RW_M3508_Controller);
   DJI_Motor_Init(&LW_M3508, &user_can_1, 2 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&LW_M3508_Controller);
-  PID_Init(&GM_6020_Controller , 1000.0f, 0.0f, 950.0f ,16000 ,0);
+  PID_Init(&GM_6020_Controller , 1000.0f, 0.0f, 1000.0f ,16000 ,0);
   DJI_Motor_Init(&PICH_GM6020, &user_can_1, 2 , 1980 , GM6020 , Rotor_angle , (CONTROLLER_INTERFACE*)&GM_6020_Controller);
 
 
@@ -390,6 +395,39 @@ static void MX_TIM12_Init(void)
 
   /* USER CODE END TIM12_Init 2 */
   HAL_TIM_MspPostInit(&htim12);
+
+}
+
+/**
+  * @brief UART7 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_UART7_Init(void)
+{
+
+  /* USER CODE BEGIN UART7_Init 0 */
+
+  /* USER CODE END UART7_Init 0 */
+
+  /* USER CODE BEGIN UART7_Init 1 */
+
+  /* USER CODE END UART7_Init 1 */
+  huart7.Instance = UART7;
+  huart7.Init.BaudRate = 115200;
+  huart7.Init.WordLength = UART_WORDLENGTH_8B;
+  huart7.Init.StopBits = UART_STOPBITS_1;
+  huart7.Init.Parity = UART_PARITY_NONE;
+  huart7.Init.Mode = UART_MODE_TX_RX;
+  huart7.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart7.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN UART7_Init 2 */
+
+  /* USER CODE END UART7_Init 2 */
 
 }
 

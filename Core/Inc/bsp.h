@@ -8,6 +8,7 @@
 #include "../../User_Algorithm/User_Controller/user_pid.h"
 #include "../../User_Drives/user_dji_vt03.h"
 #include "../../User_Drives/user_hwt906.h"
+#include "../../User_Application/PC_communication.h"
 
 /* 全局注册表 ----------------------------------------------------------------*/
 #define MAX_LOOP_EVENT 32
@@ -26,6 +27,7 @@ extern CCMRAM uint8_t JScope_RTT_UpBuffer[BUFFER_SIZE_UP];
 /*底盘CAN地址注册--------------------------------------------------------------*/
 #define Chassis_data_ID_1          (0x200)
 #define Chassis_data_ID_2          (0x201)
+#define Chassis_data_ID_3          (0x202)
 
 // 调试串口
 #include "../../User_Drives/user_uart.h"
@@ -64,5 +66,9 @@ extern VT03_DRIVES user_vt03;
 //陀螺仪注册
 extern UART_DRIVES hwt906_uart;
 extern HWT906_DRIVES user_HWT906;
+
+//电脑注册
+extern UART_DRIVES PC_uart;
+extern PC_DRIVES user_PC;
 
 #endif // USER_BSP_H
