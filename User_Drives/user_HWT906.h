@@ -12,24 +12,24 @@
 
 /* 类型定义 ------------------------------------------------------------------*/
 typedef struct {
-    short acceleration_x;  // x轴加速度
-    short acceleration_y;  // y轴加速度
-    short acceleration_z;  // z轴加速度
-    short temperature;  // 温度
+    uint16_t acceleration_x;  // x轴加速度
+    uint16_t acceleration_y;  // y轴加速度
+    uint16_t acceleration_z;  // z轴加速度
+    uint16_t temperature;  // 温度
 }ACCELERATION;
 
 typedef struct {
-    short angular_velocity_x;  // x轴角速度
-    short angular_velocity_y;  // y轴角速度
-    short angular_velocity_z;  // z轴角速度
-    short voltage;  // 电压
+    uint16_t angular_velocity_x;  // x轴角速度
+    uint16_t angular_velocity_y;  // y轴角速度
+    uint16_t angular_velocity_z;  // z轴角速度
+    uint16_t voltage;  // 电压
 }ANGULAR_VELOCITY;
 
 typedef struct {
-    short angle_x;  // x轴角度
-    short angle_y;  // y轴角度
-    short angle_z;  // z轴角度
-    short version;  // 版本号
+    uint16_t angle_x;  // x轴角度
+    uint16_t angle_y;  // y轴角度
+    uint16_t angle_z;  // z轴角度
+    uint16_t version;  // 版本号
 }ANGLE;
 
 typedef struct {

@@ -238,53 +238,35 @@ void SysTick_Handler(void)
     DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1152.0f));
     shoot_mode = 3 ;
   }
+  angle_processing(&user_holder_data ,&user_vt03, &user_HWT906 ,  &user_PC);
 
   //PICH轴控制
-  DJI_Motor_Set_State(&PICH_GM6020,  3.0667f * 0.4f * (float) user_vt03.ch1);
+  DJI_Motor_Set_State(&PICH_GM6020,  0.41f*(float)user_holder_data.holder_pitch);
 
   //发射机构控制
   if (shoot_mode == 3) {
-    //单发
-    if (user_vt03.mode_sw == 0){
-      DJI_Motor_Set_State(&RW_M3508, 6800);
-      DJI_Motor_Set_State(&LW_M3508, -6800);
-      if (user_vt03.trigger == 1) {
-        //发射频率计时
-        if (user_time_counyer % 1000 == 0 && shoot_heat >= 10 ) {
-          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
-          shoot_heat -= 10 ;
-        }
-        //反转
-        if (user_vt03.fn2 == 1) {
-          back_time_flag = user_time_counyer;
-          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 273.0f));
-          if (user_time_counyer - back_time_flag >= 300) {
-            DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 273.0f));
-          }
-        }
-      }
-    }
     //连发
-    if (user_vt03.mode_sw == 2){
+    if (user_holder_data.key_mode == 2){
       DJI_Motor_Set_State(&RW_M3508, 6800);
       DJI_Motor_Set_State(&LW_M3508, -6800);
-      if (user_vt03.trigger == 1) {
+      if (user_holder_data.key_shoot == 1) {
         //发射频率计时
         if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {
           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
           shoot_heat -= 10 ;
         }
-        //反转
-        if (user_vt03.fn2 == 1) {
-          back_time_flag = user_time_counyer;
-          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 273.0f));
-          if (user_time_counyer - back_time_flag >= 300) {
-            DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 273.0f));
-          }
+      }
+      //反转
+      if (user_holder_data.key_back == 1) {
+        back_time_flag = user_time_counyer;
+        DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 273.0f));
+        if (user_time_counyer - back_time_flag >= 300) {
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 273.0f));
         }
       }
-    }    //单发
-    if (user_vt03.mode_sw == 1){
+    }
+
+    if (user_holder_data.key_mode == 1){
       DJI_Motor_Set_State(&RW_M3508, 0);
       DJI_Motor_Set_State(&LW_M3508, 0);
     }
@@ -293,51 +275,52 @@ void SysTick_Handler(void)
   DJI_Motor_Execute(&user_can_1);
 
   //底盘通信
-  static uint16_t v = 0 ;
-  if (user_vt03.fn1 == 1) {
-    v = user_vt03.wheel;
-  }
 
   if (user_time_counyer % 2) {
     uint8_t user_can_2_send_frame_1[8] = {0};
 
-    user_can_2_send_frame_1 [0] = (uint8_t) (user_vt03.ch3 >> 0);
-    user_can_2_send_frame_1 [1] = (uint8_t) (user_vt03.ch3 >> 8);
-    user_can_2_send_frame_1 [2] = (uint8_t) (user_vt03.ch2 >> 0);
-    user_can_2_send_frame_1 [3] = (uint8_t) (user_vt03.ch2 >> 8);
-    user_can_2_send_frame_1 [4] = (uint8_t) (v >> 0);
-    user_can_2_send_frame_1 [5] = (uint8_t) (v >> 8);
-    user_can_2_send_frame_1 [6] = (uint8_t) (user_vt03.ch0 >> 0);
-    user_can_2_send_frame_1 [7] = (uint8_t) (user_vt03.ch0 >> 8);
+    user_can_2_send_frame_1 [0] = (uint8_t) (user_holder_data.w_theta_chassis >> 0);
+    user_can_2_send_frame_1 [1] = (uint8_t) (user_holder_data.w_theta_chassis >> 8);
+    user_can_2_send_frame_1 [2] = (uint8_t) (user_holder_data.d_theta_turret >> 0);
+    user_can_2_send_frame_1 [3] = (uint8_t) (user_holder_data.d_theta_turret >> 8);
+    user_can_2_send_frame_1 [4] = (uint8_t) (user_holder_data.v_y >> 0);
+    user_can_2_send_frame_1 [5] = (uint8_t) (user_holder_data.v_y >> 8);
+    user_can_2_send_frame_1 [6] = (uint8_t) (user_holder_data.v_x >> 0);
+    user_can_2_send_frame_1 [7] = (uint8_t) (user_holder_data.v_x >> 8);
 
     CAN_Send(&user_can_2, Chassis_data_ID_1 , user_can_2_send_frame_1, 8);
 
     uint8_t user_can_2_send_frame_2[8] = {0};
 
-    user_can_2_send_frame_2 [0] = (uint8_t) ((uint32_t)user_PC.holder_yaw >> 0);
-    user_can_2_send_frame_2 [1] = (uint8_t) ((uint32_t)user_PC.holder_yaw >> 8);
-    user_can_2_send_frame_2 [2] = (uint8_t) ((uint32_t)user_PC.holder_yaw >> 16);
-    user_can_2_send_frame_2 [3] = (uint8_t) ((uint32_t)user_PC.holder_yaw >> 24);
-    user_can_2_send_frame_2 [4] = (uint8_t) (user_PC.shoot_delay >> 0);
-    user_can_2_send_frame_2 [5] = (uint8_t) (user_PC.shoot_delay >> 8);
-    user_can_2_send_frame_2 [6] = 0;
-    user_can_2_send_frame_2 [7] = 0;
+    user_can_2_send_frame_1 [0] = (uint8_t) (user_holder_data.w_theta_chassis >> 0);
+    user_can_2_send_frame_1 [1] = (uint8_t) (user_holder_data.w_theta_chassis >> 8);
+    user_can_2_send_frame_1 [2] = (uint8_t) (user_holder_data.d_theta_turret >> 0);
+    user_can_2_send_frame_1 [3] = (uint8_t) (user_holder_data.d_theta_turret >> 8);
+    user_can_2_send_frame_1 [4] = (uint8_t) (user_holder_data.v_y/660*4000 >> 0);
+    user_can_2_send_frame_1 [5] = (uint8_t) (user_holder_data.v_y/660*4000 >> 8);
+    user_can_2_send_frame_1 [6] = (uint8_t) (user_holder_data.v_x/660*4000 >> 0);
+    user_can_2_send_frame_1 [7] = (uint8_t) (user_holder_data.v_x/660*4000 >> 8);
 
     CAN_Send(&user_can_2, Chassis_data_ID_2 , user_can_2_send_frame_1, 8);
 
     uint8_t user_can_2_send_frame_3[8] = {0};
 
-    user_can_2_send_frame_3 [0] = (uint8_t) (user_HWT906.user_angle.angle_z >> 0);
-    user_can_2_send_frame_3 [1] = (uint8_t) (user_HWT906.user_angle.angle_z >> 8);
-    user_can_2_send_frame_3 [2] = (uint8_t) (user_HWT906.user_angular_velocity.angular_velocity_z >> 0);
-    user_can_2_send_frame_3 [3] = (uint8_t) (user_HWT906.user_angular_velocity.angular_velocity_z >> 8);
-    user_can_2_send_frame_3 [4] = (uint8_t) (user_HWT906.user_acceleration.acceleration_x>> 0);
-    user_can_2_send_frame_3 [5] = (uint8_t) (user_HWT906.user_acceleration.acceleration_x>> 8);
-    user_can_2_send_frame_3 [6] = (uint8_t) (user_HWT906.user_acceleration.acceleration_y >> 0);
-    user_can_2_send_frame_3 [7] = (uint8_t) (user_HWT906.user_acceleration.acceleration_y >> 8);
+    user_can_2_send_frame_3 [0] = (uint8_t) (user_holder_data.angle_z >> 0);
+    user_can_2_send_frame_3 [1] = (uint8_t) (user_holder_data.angle_z >> 8);
+    user_can_2_send_frame_3 [2] = 0;
+    user_can_2_send_frame_3 [3] = 0;
+    user_can_2_send_frame_3 [4] = 0;
+    user_can_2_send_frame_3 [5] = 0;
+    user_can_2_send_frame_3 [6] = 0;
+    user_can_2_send_frame_3 [7] = 0;
 
     CAN_Send(&user_can_1, Chassis_data_ID_3 , user_can_2_send_frame_2, 8);
   }
+  char angle_z[2] = {0};
+  angle_z[0] = (uint8_t) (user_holder_data.angle_z >> 0);
+  angle_z[1] = (uint8_t) (user_holder_data.angle_z >> 8);
+  UART_Send(user_PC.user_uart,angle_z);
+
 
 
 
