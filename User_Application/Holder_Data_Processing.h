@@ -21,6 +21,7 @@ typedef struct {
     uint8_t key_shoot;
     uint8_t key_back;
     int16_t wheel;
+    float pitch_angle;
 }Holder_Data;
 
 /*函数声明-----------------------------------------------------------------------*/

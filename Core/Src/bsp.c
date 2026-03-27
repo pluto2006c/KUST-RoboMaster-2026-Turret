@@ -58,4 +58,4 @@ UART_DRIVES PC_uart = {0};
 PC_DRIVES user_PC = {0};
 
 //全局数据包注册
-extern Holder_Data user_holder_data = {0};
+ Holder_Data user_holder_data = {0};
