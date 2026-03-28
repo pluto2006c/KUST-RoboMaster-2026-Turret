@@ -14,7 +14,7 @@ typedef struct {
     int16_t d_theta_turret;
     int16_t v_y;
     int16_t v_x;
-    int16_t angle_z;
+    short angle_z;
     uint8_t key_left;
     uint8_t key_right;
     uint8_t key_mode;

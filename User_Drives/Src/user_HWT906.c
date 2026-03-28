@@ -47,22 +47,22 @@ static void HWT906_UartCallback(void* user_uart) {
         case hwt906_acceleration:  /* 加速度数据 */
             HWT906_drive->user_acceleration.acceleration_x = (short)(buf[3] | (short)(buf[2] << 8));
             HWT906_drive->user_acceleration.acceleration_y = (short)(buf[5] | (short)(buf[4] << 8));
-            HWT906_drive->user_acceleration.acceleration_z = (short)(buf[67] | (short)(buf[6] << 8));
-            HWT906_drive->user_acceleration.temperature = (short)(buf[9] | (short)(buf[8] << 8));
+            HWT906_drive->user_acceleration.acceleration_z = (short)(buf[6] | (short)(buf[7] << 8));
+            HWT906_drive->user_acceleration.temperature = (short)(buf[8] | (short)(buf[9] << 8));
             break;
 
         case hwt906_angular_velocity:  /* 角速度数据 */
-            HWT906_drive->user_angular_velocity.angular_velocity_x = (short)(buf[3] | (short)(buf[2] << 8));
-            HWT906_drive->user_angular_velocity.angular_velocity_y = (short)(buf[5] | (short)(buf[4] << 8));
-            HWT906_drive->user_angular_velocity.angular_velocity_z = (short)(buf[7] | (short)(buf[6] << 8));
-            HWT906_drive->user_angular_velocity.voltage = (short)(buf[9] | (short)(buf[8] << 8));
+            HWT906_drive->user_angular_velocity.angular_velocity_x = (short)(buf[2] | (short)(buf[3] << 8));
+            HWT906_drive->user_angular_velocity.angular_velocity_y = (short)(buf[4] | (short)(buf[5] << 8));
+            HWT906_drive->user_angular_velocity.angular_velocity_z = (short)(buf[6] | (short)(buf[7] << 8));
+            HWT906_drive->user_angular_velocity.voltage = (short)(buf[8] | (short)(buf[7] << 8));
             break;
 
         case hwt906_angle:  /* 角度数据 */
-            HWT906_drive->user_angle.angle_x = ((short)(buf[3] | (short)(buf[2] << 8)) / 32768 * 180*100);
-            HWT906_drive->user_angle.angle_y = ((short)(buf[5] | (short)(buf[4] << 8)) / 32768 * 180*100);
-            HWT906_drive->user_angle.angle_z = ((short)(buf[7] | (short)(buf[6] << 8) /32768 * 180*100 ));
-            HWT906_drive->user_angle.version = ((short)(buf[9] | (short)(buf[8] << 8)));
+        HWT906_drive->user_angle.angle_x = ((float)((uint16_t)buf[2] | (uint16_t)(buf[3] << 8)) / 32768.0f * 180.0f);
+        HWT906_drive->user_angle.angle_y = ((float)((uint16_t)buf[4] | (uint16_t)(buf[5] << 8)) / 32768.0f * 180.0f);
+        HWT906_drive->user_angle.angle_z = ((float)((uint16_t)buf[6] | (uint16_t)(buf[7] << 8)) / 32768.0f * 180.0f);
+        HWT906_drive->user_angle.version = (short)((uint16_t)(buf[8] | (uint16_t)(buf[9] << 8)));
             break;
 
         default:

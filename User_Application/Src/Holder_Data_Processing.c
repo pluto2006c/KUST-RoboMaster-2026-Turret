@@ -5,25 +5,26 @@
 void angle_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT906_DRIVES* user_HWT906 , PC_DRIVES* user_PC);
 
 /*私有变量---------------------------------------------------------------------------*/
-static int16_t old_angle_z = 0;
+static float old_angle_z = 0;
 static Holder_Data *user_holder = NULL;
 
 /*函数实现----------------------------------------------------------------------------*/
 void angle_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT906_DRIVES* user_HWT906 , PC_DRIVES* user_PC){
     //角度处理
-    const uint16_t angle_z = (float) user_HWT906->user_angle.angle_z / 100.0f;
-    uint16_t angle_z_diff = angle_z - old_angle_z;
+    const float angle_z = (float) user_HWT906->user_angle.angle_z / 100.0f;
+    float angle_z_diff = angle_z - old_angle_z;
     if (angle_z_diff > 180) {
         angle_z_diff -= 360;
     } else if (angle_z_diff < -180) {
         angle_z_diff += 360;
     }
+    old_angle_z = angle_z;
     user_holder->angle_z += angle_z_diff;
     //遥控器数据处理
     user_holder->key_mode = user_VT03->mode_sw;
     if (user_VT03->mouse_left == 1 || user_VT03->mouse_middle == 1) {
         if (user_VT03->mouse_left ==1 && user_VT03->mouse_right == 0) {
-            user_holder-  >key_mode = 2;
+            user_holder->key_mode = 2;
         }else if (user_VT03->mouse_left == 0 && user_VT03->mouse_right == 1){
             user_holder->key_mode = 1;
         }
@@ -48,11 +49,11 @@ void angle_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT906_
     }
 
 
-    user_holder->pitch_angle -= 0.0008f*user_holder->holder_pitch;
+    user_holder->pitch_angle -= 0.3f*0.0008f*user_holder->holder_pitch;
 
-    if (user_holder->pitch_angle >= 660) {
-        user_holder->pitch_angle = 660;
-    } else if (user_holder->pitch_angle <= -660) {
-        user_holder->pitch_angle = -660;
+    if (user_holder->pitch_angle >= 75) {
+        user_holder->pitch_angle = 75;
+    } else if (user_holder->pitch_angle <= -75) {
+        user_holder->pitch_angle = -75;
     }
 }

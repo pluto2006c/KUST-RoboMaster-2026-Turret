@@ -157,7 +157,7 @@ int main(void)
   PID_Init(&LW_M3508_Controller , 20.0f, 0.0f, 5.0f ,10000 ,0);
   DJI_Motor_Init(&RW_M3508, &user_can_1, 3 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&RW_M3508_Controller);
   DJI_Motor_Init(&LW_M3508, &user_can_1, 1 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&LW_M3508_Controller);
-  LADRC_Init(&GM_6020_Controller , 40.0f, 138.0f, 180.0f , 0.55f ,3000 ,0.01f);
+  LADRC_Init(&GM_6020_Controller , 10.0f, 100.0f, 30.0f , 0.8f ,3000 ,0.002f);
   DJI_Motor_Init(&PICH_GM6020, &user_can_1, 2 , 1980 , GM6020 , Rotor_angle , (CONTROLLER_INTERFACE*)&GM_6020_Controller);
 
 

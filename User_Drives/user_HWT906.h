@@ -28,7 +28,7 @@ typedef struct {
 typedef struct {
     short angle_x;  // x轴角度
     short angle_y;  // y轴角度
-    short angle_z;  // z轴角度
+    float angle_z;  // z轴角度
     short version;  // 版本号
 }ANGLE;
 
