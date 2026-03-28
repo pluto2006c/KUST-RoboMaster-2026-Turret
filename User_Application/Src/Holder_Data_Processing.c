@@ -42,8 +42,8 @@ void angle_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT906_
         user_holder->holder_yaw   = user_VT03->ch0 + user_VT03->mouse_y *360/32768;
         user_holder->d_theta_turret = user_VT03->ch0 + user_VT03->mouse_y *360/32768;
     }
-    user_holder->v_x = user_VT03->ch2 - VT03_IsKeyboardDown(KEY_A)*660 + VT03_IsKeyboardDown(KEY_D)*660;
-    user_holder->v_y = user_VT03->ch3 - VT03_IsKeyboardDown(KEY_S)*660 + VT03_IsKeyboardDown(KEY_W)*660;
+    user_holder->v_x = user_VT03->ch2 - VT03_IsKeyboardDown(KEY_S)*660 + VT03_IsKeyboardDown(KEY_W)*660;
+    user_holder->v_y = user_VT03->ch3 - VT03_IsKeyboardDown(KEY_A)*660 + VT03_IsKeyboardDown(KEY_D)*660;
     if (user_holder->key_left != 0) {
         user_holder->w_theta_chassis = user_VT03->wheel + user_VT03->mouse_z *360/32768;
     }

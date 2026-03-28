@@ -152,7 +152,7 @@ int main(void)
 
 
   PID_Init(&TP_M2006_Controller , 10.0f, 0.0f, 400.0f ,10000 ,0);
-  DJI_Motor_Init(&TP_M2006, &user_can_1, 4 , DJI_Motor_Get_Angle(&TP_M2006) , M2006 , Rotor_angle , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
+  DJI_Motor_Init(&TP_M2006, &user_can_1, 4` , DJI_Motor_Get_Angle(&TP_M2006) , M2006 , Rotor_angle , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
   PID_Init(&RW_M3508_Controller , 20.0f, 0.0f, 5.0f ,10000 ,0);
   PID_Init(&LW_M3508_Controller , 20.0f, 0.0f, 5.0f ,10000 ,0);
   DJI_Motor_Init(&RW_M3508, &user_can_1, 3 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&RW_M3508_Controller);
