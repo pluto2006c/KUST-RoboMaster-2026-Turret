@@ -197,7 +197,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
-  user_data_processing(&user_holder_data ,&user_vt03, &user_HWT906 ,  &user_PC );
+  user_data_processing(&user_holder_data ,&user_vt03, &user_HWT906 ,  &user_PC );//数据处理
   //PICH轴控制
   DJI_Motor_Set_State(&PICH_GM6020,  (float)user_holder_data.pitch_angle);
   //计时器
@@ -313,6 +313,7 @@ void SysTick_Handler(void)
 
     CAN_Send(&user_can_2, Chassis_data_ID_3 , user_can_2_send_frame_3, 8);
   }
+
   char angle_z[2] = {0};
   angle_z[0] = (uint8_t) (user_holder_data.angle_z >> 0);
   angle_z[1] = (uint8_t) (user_holder_data.angle_z >> 8);
