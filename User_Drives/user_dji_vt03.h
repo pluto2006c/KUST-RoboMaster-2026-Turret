@@ -40,9 +40,7 @@ typedef enum {
  * @brief DJI VT03遥控器数据结构
  */
 typedef struct {
-    // 帧头
-    uint8_t sof_1;             // 起始字节1
-    uint8_t sof_2;             // 起始字节2
+
     
     // 遥控器通道数据
     int16_t ch0;              // 通道0 (右摇杆水平)

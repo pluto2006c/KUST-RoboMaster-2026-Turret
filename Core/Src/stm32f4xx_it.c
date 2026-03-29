@@ -197,6 +197,9 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   /* USER CODE BEGIN SysTick_IRQn 0 */
+  user_data_processing(&user_holder_data ,&user_vt03, &user_HWT906 ,  &user_PC );
+  //PICH轴控制
+  DJI_Motor_Set_State(&PICH_GM6020,  (float)user_holder_data.pitch_angle);
   //计时器
   static int user_time_counyer = 0 ;
   uint8_t back_time_flag = 0 ;
@@ -206,6 +209,7 @@ void SysTick_Handler(void)
   }else {
     user_time_counyer ++ ;
   }
+
 
   //热量管理
   static float shoot_heat = 0 ;
@@ -238,10 +242,6 @@ void SysTick_Handler(void)
     DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1152.0f));
     shoot_mode = 3 ;
   }
-  angle_processing(&user_holder_data ,&user_vt03, &user_HWT906 ,  &user_PC);
-
-  //PICH轴控制
-  DJI_Motor_Set_State(&PICH_GM6020,  (float)user_holder_data.pitch_angle);
 
   //发射机构控制
   if (shoot_mode == 3) {
@@ -249,14 +249,14 @@ void SysTick_Handler(void)
     if (user_holder_data.key_mode == 1 || user_holder_data.key_mode == 2){
       DJI_Motor_Set_State(&RW_M3508, 6500);
       DJI_Motor_Set_State(&LW_M3508, -6500);
-      if (user_holder_data.key_shoot != 0) {
+      if (user_holder_data.key_shoot == 1) {
         //发射频率计时
         if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {
           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
           shoot_heat -= 10 ;
         }
       }
-      if (user_holder_data.key_back != 0) {
+      if (user_holder_data.key_back == 1) {
         if (user_time_counyer % 1000 == 0) {
           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 1296.0f));
         }
@@ -280,10 +280,10 @@ void SysTick_Handler(void)
     user_can_2_send_frame_1 [1] = (uint8_t) (user_holder_data.w_theta_chassis >> 8);
     user_can_2_send_frame_1 [2] = (uint8_t) (user_holder_data.d_theta_turret >> 0);
     user_can_2_send_frame_1 [3] = (uint8_t) (user_holder_data.d_theta_turret >> 8);
-    user_can_2_send_frame_1 [4] = (uint8_t) (user_holder_data.v_y >> 0);
-    user_can_2_send_frame_1 [5] = (uint8_t) (user_holder_data.v_y >> 8);
-    user_can_2_send_frame_1 [6] = (uint8_t) (user_holder_data.v_x >> 0);
-    user_can_2_send_frame_1 [7] = (uint8_t) (user_holder_data.v_x >> 8);
+    user_can_2_send_frame_1 [4] = (uint8_t) (user_holder_data.value_y >> 0);
+    user_can_2_send_frame_1 [5] = (uint8_t) (user_holder_data.value_y >> 8);
+    user_can_2_send_frame_1 [6] = (uint8_t) (user_holder_data.value_x >> 0);
+    user_can_2_send_frame_1 [7] = (uint8_t) (user_holder_data.value_x >> 8);
 
     CAN_Send(&user_can_2, Chassis_data_ID_1 , user_can_2_send_frame_1, 8);
 
@@ -293,10 +293,10 @@ void SysTick_Handler(void)
     user_can_2_send_frame_2 [1] = (uint8_t) (user_holder_data.w_theta_chassis >> 8);
     user_can_2_send_frame_2 [2] = (uint8_t) (user_holder_data.d_theta_turret >> 0);
     user_can_2_send_frame_2 [3] = (uint8_t) (user_holder_data.d_theta_turret >> 8);
-    user_can_2_send_frame_2 [4] = (uint8_t) ((int16_t)((float)user_holder_data.v_y/660*4000) >> 0);
-    user_can_2_send_frame_2 [5] = (uint8_t) ((int16_t)((float)user_holder_data.v_y/660*4000) >> 8);
-    user_can_2_send_frame_2 [6] = (uint8_t) ((int16_t)((float)user_holder_data.v_x/660*4000) >> 0);
-    user_can_2_send_frame_2 [7] = (uint8_t) ((int16_t)((float)user_holder_data.v_x/660*4000) >> 8);
+    user_can_2_send_frame_2 [4] = (uint8_t) ((int16_t)((float)user_holder_data.value_y/660*4000) >> 0);
+    user_can_2_send_frame_2 [5] = (uint8_t) ((int16_t)((float)user_holder_data.value_y/660*4000) >> 8);
+    user_can_2_send_frame_2 [6] = (uint8_t) ((int16_t)((float)user_holder_data.value_x/660*4000) >> 0);
+    user_can_2_send_frame_2 [7] = (uint8_t) ((int16_t)((float)user_holder_data.value_x/660*4000) >> 8);
 
     CAN_Send(&user_can_2, Chassis_data_ID_2 , user_can_2_send_frame_2, 8);
 
