@@ -247,8 +247,8 @@ void SysTick_Handler(void)
   if (shoot_mode == 3) {
     //连发
     if (user_holder_data.key_mode == 1 || user_holder_data.key_mode == 2){
-      DJI_Motor_Set_State(&RW_M3508, 6800);
-      DJI_Motor_Set_State(&LW_M3508, -6800);
+      DJI_Motor_Set_State(&RW_M3508, 6500);
+      DJI_Motor_Set_State(&LW_M3508, -6500);
       if (user_holder_data.key_shoot != 0) {
         //发射频率计时
         if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {

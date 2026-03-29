@@ -140,7 +140,7 @@ static void VT03_UartCallback(void* user_uart) {
     vt03_drive->fn2 = (buf[8] & 0b00000001);
     vt03_drive->wheel = ((uint16_t)(buf[8]>>1 | buf[9]<<7) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
 	vt03_drive->trigger = (buf[9]>>4) & 0b00000001;
-	vt03_drive->mouse_x = ((uint16_t)(buf[10]>>0 | buf[11]<<8 )) - DJI_VT03_CH_OFFSET;
+	vt03_drive->mouse_x = (((uint16_t)(buf[10]>>0 | buf[11]<<8 ))/32767*660) - DJI_VT03_CH_OFFSET;
 	vt03_drive->mouse_y = ((uint16_t)(buf[12]>>0 | buf[13]<<8 )) - DJI_VT03_CH_OFFSET;
 	vt03_drive->mouse_z = ((uint16_t)(buf[14]>>0 | buf[15]<<8 )) - DJI_VT03_CH_OFFSET;
 	vt03_drive->mouse_left = ((uint8_t)(buf[16]>>0) & 0b00000011) ;

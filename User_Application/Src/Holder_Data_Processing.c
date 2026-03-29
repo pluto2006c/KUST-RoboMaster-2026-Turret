@@ -32,7 +32,7 @@ void angle_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT906_
     user_holder->key_left = user_VT03->fn1 + VT03_IsKeyboardDown(KEY_Q);
     user_holder->key_right = user_VT03->fn2 + VT03_IsKeyboardDown(KEY_E);
     user_holder->key_shoot = user_VT03->trigger + user_VT03->mouse_left + user_VT03->mouse_right;
-    user_holder->key_back  = user_holder->key_right = user_VT03->fn2   + user_VT03 ->mouse_middle;
+    user_holder->key_back  = user_holder->key_right = user_VT03->fn2;
     if (user_holder->key_mode == 2) {
         user_holder->holder_pitch = user_VT03->ch1 + user_PC->holder_pitch + user_VT03->mouse_x *360/32768;
         user_holder->holder_yaw   = user_VT03->ch0 + user_PC->holder_yaw   + user_VT03->mouse_y *360/32768;
