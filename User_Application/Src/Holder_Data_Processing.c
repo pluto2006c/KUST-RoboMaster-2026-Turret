@@ -61,7 +61,7 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
 
     if (VT03_IsKeyboardDown(KEY_SHIFT)) {
         user_holder->value_max = 220;
-    }else if (VT03_IsKeyboardDown(KEY_CTRL)) {
+    }else if (VT03_IsKeyboardDown(KEY_CTRL) || user_VT03->pause == 1) {
         user_holder->value_max = 660;
     }else {
         user_holder->value_max = 440;
