@@ -53,6 +53,7 @@ UART_HandleTypeDef huart8;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart3;
 UART_HandleTypeDef huart6;
+DMA_HandleTypeDef hdma_uart7_rx;
 DMA_HandleTypeDef hdma_uart8_rx;
 DMA_HandleTypeDef hdma_usart1_rx;
 DMA_HandleTypeDef hdma_usart3_rx;
@@ -131,7 +132,7 @@ int main(void)
   //串口初始化
   UART_Init(&user_debug_uart, &huart6);
   UART_Init(&vt03_uart, &huart3);
-  UART_Init(&PC_uart, &huart7);
+  UART_Init(&PC_uart, &huart7 );
   UART_Init(&hwt906_uart, &huart8);
 
   LED_Init(&user_red_led, LED_RED_GPIO_Port, LED_RED_Pin, 1);
@@ -157,7 +158,7 @@ int main(void)
   PID_Init(&LW_M3508_Controller , 20.0f, 0.0f, 5.0f ,10000 ,0);
   DJI_Motor_Init(&RW_M3508, &user_can_1, 3 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&RW_M3508_Controller);
   DJI_Motor_Init(&LW_M3508, &user_can_1, 1 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&LW_M3508_Controller);
-  LADRC_Init(&GM_6020_Controller , 35.0f, 2800.0f, 2100.0f , 0.7f ,3000 ,0.002f);
+  LADRC_Init(&GM_6020_Controller , 40.0f, 1200.0f, 120.0f , 5.0f ,3000 ,0.002f);
   DJI_Motor_Init(&PICH_GM6020, &user_can_1, 2 , 1980 , GM6020 , Rotor_angle , (CONTROLLER_INTERFACE*)&GM_6020_Controller);
 
 
@@ -415,7 +416,7 @@ static void MX_UART7_Init(void)
 
   /* USER CODE END UART7_Init 1 */
   huart7.Instance = UART7;
-  huart7.Init.BaudRate = 115200;
+  huart7.Init.BaudRate = 921600;
   huart7.Init.WordLength = UART_WORDLENGTH_8B;
   huart7.Init.StopBits = UART_STOPBITS_1;
   huart7.Init.Parity = UART_PARITY_NONE;
@@ -581,6 +582,9 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream3_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream3_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream3_IRQn);
+  /* DMA1_Stream4_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream4_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream4_IRQn);
   /* DMA1_Stream6_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);

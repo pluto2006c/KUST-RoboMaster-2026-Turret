@@ -63,6 +63,7 @@
 extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 extern TIM_HandleTypeDef htim2;
+extern DMA_HandleTypeDef hdma_uart7_rx;
 extern DMA_HandleTypeDef hdma_uart8_rx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
@@ -201,8 +202,8 @@ void SysTick_Handler(void)
   //PICH轴控制
   DJI_Motor_Set_State(&PICH_GM6020,  (float)user_holder_data.pitch_angle);
   //计时器
-  static int user_time_counyer = 0 ;
-  uint8_t back_time_flag = 0 ;
+  static int user_time_counyer = 100000 ;
+  user_holder_data.user_time_flash = user_time_counyer;
 
   if (user_time_counyer == 1000) {
     user_time_counyer = 0 ;
@@ -362,10 +363,24 @@ void DMA1_Stream3_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Stream3_IRQn 0 */
 
   /* USER CODE END DMA1_Stream3_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart3_tx);
+  HAL_DMA_IRQHandler(&hdma_uart7_rx);
   /* USER CODE BEGIN DMA1_Stream3_IRQn 1 */
 
   /* USER CODE END DMA1_Stream3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA1 stream4 global interrupt.
+  */
+void DMA1_Stream4_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Stream4_IRQn 0 */
+
+  /* USER CODE END DMA1_Stream4_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart3_tx);
+  /* USER CODE BEGIN DMA1_Stream4_IRQn 1 */
+
+  /* USER CODE END DMA1_Stream4_IRQn 1 */
 }
 
 /**

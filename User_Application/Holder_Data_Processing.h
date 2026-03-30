@@ -11,7 +11,7 @@
 
 typedef struct {
     int16_t a;
-    int8_t m;
+    uint16_t m;
     int16_t v;
     int16_t p;
 }ANAC;//以上均为无量纲参数
@@ -22,7 +22,7 @@ typedef struct {
     int16_t d_theta_turret;
     int16_t v_y;
     int16_t v_x;
-    short angle_z;
+    int16_t angle_z;
     uint8_t key_left;
     uint8_t key_right;
     uint8_t key_mode;
@@ -34,6 +34,7 @@ typedef struct {
     int16_t value_y;
     uint16_t value_max;
     uint16_t user_time_flash;
+    uint16_t user_value;
     ANAC anac;
 }Holder_Data;
 
