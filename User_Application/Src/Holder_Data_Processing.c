@@ -94,7 +94,7 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
     if (user_holder->key_mode == 2) { /* PC 控制模式 */
         user_holder->holder_pitch = max_data(660 ,user_VT03->ch1 + user_PC->holder_pitch + user_VT03->mouse_y );
         user_holder->d_theta_turret = max_data(660 , user_VT03->ch0 + user_PC->holder_yaw   + user_VT03->mouse_x );
-    }else { /* 遥控器控制模式 */
+    }else if(user_holder->key_mode == 1 || user_holder->key_mode == 0){ /* 遥控器控制模式 */
         user_holder->holder_pitch = max_data(660 ,user_VT03->ch1 + user_VT03->mouse_y ) ;
         user_holder->d_theta_turret = max_data(660 , user_VT03->ch0 + user_VT03->mouse_x );
     }

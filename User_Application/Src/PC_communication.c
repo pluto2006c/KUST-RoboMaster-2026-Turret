@@ -17,9 +17,9 @@ static void PC_UartCallback(void* user_uart) {
     char PC_buffer_head[2] = { 0xEB, 0x90 } ;
 
     /* 获取串口数据 */
-    // if (!UART_GetDataWithHLen(user_uart, buf, PC_buffer_head , PC_BUFFLEN)) {
-    //     return;
-    // }
+    if (!UART_GetDataWithHLen(user_uart, buf, PC_buffer_head , PC_BUFFLEN)) {
+        return;
+    }
     user_PC_drive -> holder_pitch = (float)((uint32_t)buf[2] | (uint32_t)(buf[3] << 8) | (uint32_t)(buf[4] << 16) | (uint32_t)(buf[5] << 24));
     user_PC_drive -> holder_yaw  = (float)((uint32_t)buf[6] | (uint32_t)(buf[7] << 8) | (uint32_t)(buf[8] << 16) | (uint32_t)(buf[9] << 24));
     user_PC_drive -> shoot_delay= (float)((uint32_t)buf[10] | (uint16_t)(buf[11] << 8));
@@ -32,7 +32,6 @@ static void PC_UartCallback(void* user_uart) {
 void PC_Init(PC_DRIVES* User_PC , UART_DRIVES* PC_UART) {
     user_PC_drive = User_PC;
     User_PC->user_uart = PC_UART;
-
     /* 注册串口回调函数 */
     UART_RegisterCallback(User_PC->user_uart, PC_UartCallback);
 }
