@@ -64,7 +64,6 @@ extern CAN_HandleTypeDef hcan1;
 extern CAN_HandleTypeDef hcan2;
 extern TIM_HandleTypeDef htim2;
 extern DMA_HandleTypeDef hdma_uart7_rx;
-extern DMA_HandleTypeDef hdma_uart8_rx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
@@ -212,6 +211,7 @@ void SysTick_Handler(void)
   }
 
 
+
   //热量管理
   static float shoot_heat = 0 ;
   if (user_time_counyer % 100 == 0) {
@@ -315,10 +315,14 @@ void SysTick_Handler(void)
     CAN_Send(&user_can_2, Chassis_data_ID_3 , user_can_2_send_frame_3, 8);
   }
 
-  char angle_z[2] = {0};
-  angle_z[0] = (uint8_t) (user_holder_data.angle_z >> 0);
-  angle_z[1] = (uint8_t) (user_holder_data.angle_z >> 8);
-  UART_Send(user_PC.user_uart,angle_z);
+  char angle_z[4] = {0};
+  char angle_data_head = 0xEB;
+  char angle_data_tail = 0x90;
+  angle_z[0] = angle_data_head;
+  angle_z[1] = (uint8_t) ((int16_t)user_holder_data.angle_z >> 0);
+  angle_z[2] = (uint8_t) ((int16_t)user_holder_data.angle_z >> 8);
+  angle_z[3] = angle_data_tail;
+  UART_Send(user_PC.user_uart, angle_z , 4);
 
 
 
@@ -381,20 +385,6 @@ void DMA1_Stream4_IRQHandler(void)
   /* USER CODE BEGIN DMA1_Stream4_IRQn 1 */
 
   /* USER CODE END DMA1_Stream4_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 stream6 global interrupt.
-  */
-void DMA1_Stream6_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Stream6_IRQn 0 */
-
-  /* USER CODE END DMA1_Stream6_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_uart8_rx);
-  /* USER CODE BEGIN DMA1_Stream6_IRQn 1 */
-
-  /* USER CODE END DMA1_Stream6_IRQn 1 */
 }
 
 /**

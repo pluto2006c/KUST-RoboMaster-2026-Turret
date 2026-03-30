@@ -78,8 +78,18 @@ void UART_RegisterCallback(UART_DRIVES* user_uart, const UART_Callback callback)
 * @brief 通过队列发送数据
 * @param user_uart UART 驱动结构体指针
 * @param str       要发送的字符串
+* @param len       要发送的数据长度
 */
-void UART_Send(UART_DRIVES* user_uart, const char* str) {
+void UART_Send(UART_DRIVES* user_uart, const char* str, const uint16_t len) {
+    Queue_Push(&user_uart->tx_queue, (char*)str, len);
+}
+
+/**
+* @brief 通过队列发送字符串
+* @param user_uart UART 驱动结构体指针
+* @param str       要发送的字符串
+*/
+void UART_Send_Str(UART_DRIVES* user_uart, const char* str) {
     Queue_Push(&user_uart->tx_queue, (char*)str, strlen(str));
 }
 

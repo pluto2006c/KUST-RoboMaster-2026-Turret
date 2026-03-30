@@ -2,7 +2,8 @@
 #include "../../User_Application/Holder_Data_Processing.h"
 
 /*私有变量---------------------------------------------------------------------------*/
-static float old_angle_z = 0;            /* 上一次的 Z 轴角度 */
+
+
 static Holder_Data *user_holder = NULL;  /* 用户数据结构体指针 */
 
 /*函数实现----------------------------------------------------------------------------*/
@@ -31,6 +32,10 @@ static float max_data(float max , float user_data) {
  */
 void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT906_DRIVES* user_HWT906 , PC_DRIVES* user_PC) {
     static uint8_t keyboard_shoot_mode = 0 ; /* 键盘射击模式 */
+    static float old_angle_z = 0;
+    static uint8_t get_angel_mode = 0 ; /* 获取角度模式 */
+
+
 
     /* 按 R 键切换射击模式 */
     if (user_holder->user_time_flash % 1000 == 0 && VT03_IsKeyboardDown(KEY_R) ==1 ) {
@@ -51,7 +56,11 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
         user_holder->anac.a = 1;
 
     /* 角度处理 */
-    const float angle_z = (float) user_HWT906->user_angle.angle_z;
+    if (get_angel_mode == 0 && user_HWT906->user_angle.angle_z != 0) {
+        old_angle_z= user_HWT906->user_angle.angle_z;
+        get_angel_mode = 1 ;
+    }
+    float angle_z =user_HWT906->user_angle.angle_z;
     float angle_z_diff = angle_z - old_angle_z;
     if (angle_z_diff > 180) {
         angle_z_diff -= 360;
@@ -60,6 +69,12 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
     }
     old_angle_z = angle_z;
     user_holder->angle_z += angle_z_diff;
+    if (user_holder->angle_z > 180) {
+        user_holder->angle_z -= 360;
+    } else if (user_holder->angle_z < -180) {
+        user_holder->angle_z += 360;
+    }
+
 
     /* 遥控器数据处理 */
     user_holder->key_mode = user_VT03->mode_sw + keyboard_shoot_mode;
@@ -91,7 +106,7 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
         user_holder->w_theta_chassis = user_VT03->wheel + user_VT03->mouse_z;
     }
 
-    user_holder->pitch_angle -= max_data(75 ,0.3f*0.0008f*user_holder->holder_pitch);
+    user_holder->pitch_angle = max_data(75 ,user_holder->pitch_angle + 0.3f*0.0008f*user_holder->holder_pitch);
 
     /* 速度限制 */
     if (VT03_IsKeyboardDown(KEY_SHIFT)) {
@@ -102,54 +117,40 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
         user_holder->value_max = 440;
     }
 
-    if (user_holder->user_time_flash % 10 == 0 && user_holder->user_value <= user_holder->value_max && (user_holder-> user_value >= 15 || user_holder->user_value == 0) ) {
+    if (user_holder->user_time_flash % 10 == 0 ) {
         /* X轴加速逻辑 */
-        if (user_holder->v_x > 0 && user_holder->value_x <= user_holder->v_x) {
+        if (user_holder->v_x > 0 ) {
             user_holder->value_x += user_holder->anac.a;
-        }else if (user_holder->v_x < 0 && user_holder->value_x != user_holder->v_x){
+        }else if (user_holder->v_x < 0 ){
             user_holder->value_x -= user_holder->anac.a;
         }
 
         /* X轴减速逻辑 */
-        if (user_holder->v_x == 0) {
-            if (user_holder->value_x >0) {
-                user_holder->value_x -=  user_holder->anac.a;
-            }else if (user_holder->value_x <0) {
-                user_holder->value_x +=  user_holder->anac.a;
-            }else if (user_holder->value_x < 20 && user_holder->value_x > -20 ) {
-                user_holder->value_x = 0 ;
-            }
+        if (user_holder->value_x >0 && user_holder->v_x == 0) {
+            user_holder->value_x -=  user_holder->anac.a;
+        }else if (user_holder->value_x <0 && user_holder->v_x == 0) {
+            user_holder->value_x +=  user_holder->anac.a;
+        }else if(user_holder->v_x == 0 && user_holder->user_value <= 20) {
+            user_holder->value_x = 0;
         }
 
         /* Y轴加速逻辑 */
-        if (user_holder->v_y >0 && user_holder->value_y <= user_holder->v_y) {
+        if (user_holder->v_y >0 ) {
             user_holder->value_y += user_holder->anac.a;
-        }else if (user_holder->v_y < 0 && user_holder->value_y != user_holder->v_y) {
+        }else if (user_holder->v_y < 0 ) {
             user_holder->value_y -= user_holder->anac.a;
         }
 
         /* Y轴减速逻辑 */
-        if (user_holder->v_y == 0) {
-            if (user_holder->value_y >0) {
-                user_holder->value_y -=  user_holder->anac.a;
-            }else if (user_holder->value_y <0) {
-                user_holder->value_y +=  user_holder->anac.a;
-            }else if (user_holder->value_y < 20 && user_holder->value_y > -20 ) {
-                user_holder->value_y = 0 ;
-            }
-        }
-
-    }else if (user_holder->user_time_flash % 10 == 0 && user_holder->user_value >= user_holder->value_max){
-        /* 超速限制逻辑 */
-        if (user_holder->v_y == 0 && user_holder->value_y >0) {
-            user_holder->value_y -= user_holder->anac.a;
-        }else if (user_holder->v_y == 0 && user_holder->value_y <0) {
+        if (user_holder->value_y >0 && user_holder->v_y == 0) {
+            user_holder->value_y -=  user_holder->anac.a;
+        }else if (user_holder->value_y <0 && user_holder->v_y == 0) {
             user_holder->value_y +=  user_holder->anac.a;
-        }
-        if (user_holder->v_x == 0 && user_holder->value_x >0) {
-            user_holder->value_x -=  user_holder->anac.a;
-        }else if (user_holder->v_x == 0 && user_holder->value_x <0) {
-            user_holder->value_x +=  user_holder->anac.a;
+        }else if(user_holder->v_y == 0 && user_holder->user_value <= 20) {
+            user_holder->value_y = 0;
         }
     }
+
+    user_holder->value_y = max_data(user_holder->value_max , user_holder->value_y);
+    user_holder->value_x = max_data(user_holder->value_max , user_holder->value_x);
 }

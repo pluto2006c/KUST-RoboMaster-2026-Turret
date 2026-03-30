@@ -45,7 +45,9 @@ typedef struct {
 /* 函数声明 ------------------------------------------------------------------*/
 void UART_Init(UART_DRIVES* user_uart, UART_HandleTypeDef* huart);
 void UART_RegisterCallback(UART_DRIVES* user_uart, UART_Callback callback);
-void UART_Send(UART_DRIVES* user_uart, const char* str);
+void UART_Send(UART_DRIVES* user_uart, const char* str, uint16_t len);
+void UART_Send_Str(UART_DRIVES* user_uart, const char* str);
+
 
 uint16_t UART_GetDataWithHT(UART_DRIVES* user_uart, uint8_t *data, const char *head, const char *tail);
 uint16_t UART_GetDataWithHLen(UART_DRIVES* user_uart, uint8_t *data, const char *head, uint16_t len);
