@@ -174,7 +174,8 @@ uint16_t RingBuffer_GetWith_H_Len(RING_BUFFER *buffer, uint8_t *data, const char
             return len;
         }
     }
-    return 0;
+    const uint8_t val = 0;
+    return val;
 }
 
 

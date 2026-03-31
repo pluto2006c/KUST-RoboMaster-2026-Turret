@@ -7,6 +7,7 @@
 #include "../../User_Drives/user_HWT906.h"
 #include "../../User_Drives/user_dji_vt03.h"
 #include "../../User_Application/PC_communication.h"
+#include <time.h>
 /*类定义----------------------------------------------------------------------*/
 
 typedef struct {

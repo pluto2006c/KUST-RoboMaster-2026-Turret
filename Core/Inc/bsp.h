@@ -10,7 +10,7 @@
 #include "../../User_Drives/user_hwt906.h"
 #include "../../User_Application/PC_communication.h"
 #include "../../User_Application/Holder_Data_Processing.h"
-#include "../../User_Algorithm/User_Controller/user_ladrc.h"
+#include "../../User_Algorithm/User_Controller/user_pid_tolerance.h"
 
 /* 全局注册表 ----------------------------------------------------------------*/
 #define MAX_LOOP_EVENT 32
@@ -52,7 +52,7 @@ extern CAN_DRIVES user_can_2;
 extern PID_Controller TP_M2006_Controller;
 extern PID_Controller LW_M3508_Controller;
 extern PID_Controller RW_M3508_Controller;
-extern LADRC_Controller GM_6020_Controller;
+extern PID_Tolerance_Controller GM_6020_Controller;
 
 //电机注册
 
@@ -75,5 +75,6 @@ extern PC_DRIVES user_PC;
 
 //全局数据包注册
 extern Holder_Data user_holder_data;
+
 
 #endif // USER_BSP_H

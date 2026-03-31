@@ -69,8 +69,14 @@ extern DMA_HandleTypeDef hdma_uart8_tx;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart3_rx;
 extern DMA_HandleTypeDef hdma_usart3_tx;
+extern DMA_HandleTypeDef hdma_usart6_rx;
+extern DMA_HandleTypeDef hdma_usart6_tx;
+extern UART_HandleTypeDef huart8;
 extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart6;
+
 /* USER CODE BEGIN EV */
+
 
 /* USER CODE END EV */
 
@@ -201,6 +207,7 @@ void SysTick_Handler(void)
   DJI_Motor_Set_State(&PICH_GM6020,  (float)user_holder_data.pitch_angle);
   //计时器
   static int user_time_counyer = 100000 ;
+  static uint8_t time_flash = 0 ;
   user_holder_data.user_time_flash = user_time_counyer;
 
   if (user_time_counyer == 1000) {
@@ -223,6 +230,7 @@ void SysTick_Handler(void)
 
   //模式控制
   static uint8_t shoot_mode = 0 ;
+  static uint8_t ai_shoot_mode = 0 ;
 
   if (shoot_mode == 0 || shoot_mode == 1) {
     if (user_time_counyer % 10 == 0) {
@@ -245,19 +253,26 @@ void SysTick_Handler(void)
 
   //发射机构控制
   if (shoot_mode == 3) {
-    // if (user_PC.shoot_delay > 0) {
-    //   int time_flash = 0 ;
-    //   time_flash = user_time_counyer;
-    //   if () {
-    //
-    //   }
-    // }
+
+    //全自动连发
+    if (user_holder_data.key_mode == 2 ) {
+      if (user_PC.shoot_delay != 0xFFFF && ai_shoot_mode == 0) {
+        time_flash = user_time_counyer;
+        ai_shoot_mode = 1 ;
+      }
+      if (ai_shoot_mode == 1 && user_time_counyer - time_flash == user_PC.shoot_delay && shoot_heat >= 10) {
+        DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
+        shoot_heat -= 10 ;
+        ai_shoot_mode = 0 ;
+      }
+    }
+
 
     //连发
     if (user_holder_data.key_mode == 1 || user_holder_data.key_mode == 2){
       DJI_Motor_Set_State(&RW_M3508, 6500);
       DJI_Motor_Set_State(&LW_M3508, -6500);
-      if (user_holder_data.key_shoot == 1) {
+      if (user_holder_data.key_shoot == 1 && ai_shoot_mode == 0) {
         //发射频率计时
         if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {
           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
@@ -286,8 +301,8 @@ void SysTick_Handler(void)
 
     user_can_2_send_frame_1 [0] = (uint8_t) (user_holder_data.w_theta_chassis >> 0);
     user_can_2_send_frame_1 [1] = (uint8_t) (user_holder_data.w_theta_chassis >> 8);
-    user_can_2_send_frame_1 [2] = (uint8_t) (user_holder_data.d_theta_turret >> 0);
-    user_can_2_send_frame_1 [3] = (uint8_t) (user_holder_data.d_theta_turret >> 8);
+    user_can_2_send_frame_1 [2] = (uint8_t) (user_holder_data.d_theta_turret  >> 0);
+    user_can_2_send_frame_1 [3] = (uint8_t) (user_holder_data.d_theta_turret  >> 8);
     user_can_2_send_frame_1 [4] = (uint8_t) (user_holder_data.value_y >> 0);
     user_can_2_send_frame_1 [5] = (uint8_t) (user_holder_data.value_y >> 8);
     user_can_2_send_frame_1 [6] = (uint8_t) (user_holder_data.value_x >> 0);
@@ -299,14 +314,16 @@ void SysTick_Handler(void)
 
     user_can_2_send_frame_2 [0] = (uint8_t) (user_holder_data.w_theta_chassis >> 0);
     user_can_2_send_frame_2 [1] = (uint8_t) (user_holder_data.w_theta_chassis >> 8);
-    user_can_2_send_frame_2 [2] = (uint8_t) (user_holder_data.d_theta_turret >> 0);
-    user_can_2_send_frame_2 [3] = (uint8_t) (user_holder_data.d_theta_turret >> 8);
+    user_can_2_send_frame_2 [2] = (uint8_t) (user_holder_data.d_theta_turret  >> 0);
+    user_can_2_send_frame_2 [3] = (uint8_t) (user_holder_data.d_theta_turret  >> 8);
     user_can_2_send_frame_2 [4] = (uint8_t) ((int16_t)((float)user_holder_data.value_y/660*4000) >> 0);
     user_can_2_send_frame_2 [5] = (uint8_t) ((int16_t)((float)user_holder_data.value_y/660*4000) >> 8);
     user_can_2_send_frame_2 [6] = (uint8_t) ((int16_t)((float)user_holder_data.value_x/660*4000) >> 0);
     user_can_2_send_frame_2 [7] = (uint8_t) ((int16_t)((float)user_holder_data.value_x/660*4000) >> 8);
 
     CAN_Send(&user_can_2, Chassis_data_ID_2 , user_can_2_send_frame_2, 8);
+
+    user_holder_data.d_theta_turret = 0 ;
 
     uint8_t user_can_2_send_frame_3[8] = {0};
 
@@ -322,14 +339,20 @@ void SysTick_Handler(void)
     CAN_Send(&user_can_2, Chassis_data_ID_3 , user_can_2_send_frame_3, 8);
   }
 
-  char angle_z[4] = {0};
-  char angle_data_head = 0xEB;
-  char angle_data_tail = 0x90;
-  angle_z[0] = angle_data_head;
-  angle_z[1] = (uint8_t) ((int16_t)user_holder_data.angle_z >> 0);
-  angle_z[2] = (uint8_t) ((int16_t)user_holder_data.angle_z >> 8);
-  angle_z[3] = angle_data_tail;
-  UART_Send(user_PC.user_uart, angle_z , 4);
+  char angle_z[8] = {0};
+  char angle_data_head[2] = { 0xEB , 0x90 };
+  char angle_data_tail[2] = { 0x90 , 0xEB };
+  angle_z[0] = angle_data_head[0];
+  angle_z[1] = angle_data_head[1];
+  const float inv_angle_z = -user_holder_data.angle_z;
+  angle_z[2] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 0);
+  angle_z[3] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 8);
+  angle_z[4] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 16);
+  angle_z[5] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 24);
+  angle_z[6] = angle_data_tail[0];
+  angle_z[7] = angle_data_tail[1];
+  UART_Send(user_PC.user_uart, angle_z , 8);
+
 
 
 
@@ -467,6 +490,34 @@ void USART1_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA2 stream1 global interrupt.
+  */
+void DMA2_Stream1_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream1_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart6_rx);
+  /* USER CODE BEGIN DMA2_Stream1_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles DMA2 stream2 global interrupt.
+  */
+void DMA2_Stream2_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA2_Stream2_IRQn 0 */
+
+  /* USER CODE END DMA2_Stream2_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart1_rx);
+  /* USER CODE BEGIN DMA2_Stream2_IRQn 1 */
+
+  /* USER CODE END DMA2_Stream2_IRQn 1 */
+}
+
+/**
   * @brief This function handles CAN2 RX0 interrupts.
   */
 void CAN2_RX0_IRQHandler(void)
@@ -481,17 +532,45 @@ void CAN2_RX0_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMA2 stream5 global interrupt.
+  * @brief This function handles DMA2 stream6 global interrupt.
   */
-void DMA2_Stream5_IRQHandler(void)
+void DMA2_Stream6_IRQHandler(void)
 {
-  /* USER CODE BEGIN DMA2_Stream5_IRQn 0 */
+  /* USER CODE BEGIN DMA2_Stream6_IRQn 0 */
 
-  /* USER CODE END DMA2_Stream5_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart1_rx);
-  /* USER CODE BEGIN DMA2_Stream5_IRQn 1 */
+  /* USER CODE END DMA2_Stream6_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart6_tx);
+  /* USER CODE BEGIN DMA2_Stream6_IRQn 1 */
 
-  /* USER CODE END DMA2_Stream5_IRQn 1 */
+  /* USER CODE END DMA2_Stream6_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART6 global interrupt.
+  */
+void USART6_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART6_IRQn 0 */
+
+  /* USER CODE END USART6_IRQn 0 */
+  HAL_UART_IRQHandler(&huart6);
+  /* USER CODE BEGIN USART6_IRQn 1 */
+
+  /* USER CODE END USART6_IRQn 1 */
+}
+
+/**
+  * @brief This function handles UART8 global interrupt.
+  */
+void UART8_IRQHandler(void)
+{
+  /* USER CODE BEGIN UART8_IRQn 0 */
+
+  /* USER CODE END UART8_IRQn 0 */
+  HAL_UART_IRQHandler(&huart8);
+  /* USER CODE BEGIN UART8_IRQn 1 */
+
+  /* USER CODE END UART8_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
