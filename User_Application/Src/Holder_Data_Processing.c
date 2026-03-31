@@ -8,12 +8,6 @@ static Holder_Data *user_holder = NULL;  /* 用户数据结构体指针 */
 
 /*函数实现----------------------------------------------------------------------------*/
 
-/**
- * @brief 限制数据范围
- * @param max       最大值
- * @param user_data 用户数据
- * @return 限制后的数据
- */
 static float max_data(float max , float user_data) {
     if (user_data >= max) {
         user_data = max;
@@ -22,6 +16,32 @@ static float max_data(float max , float user_data) {
     }
     return user_data;
 }
+
+static int get_value(int16_t out_value ,int16_t in_value ,int16_t acceleration ,int16_t total_value ,int16_t max_value) {
+    if (in_value > 0) {
+        out_value += fmin(in_value - out_value , acceleration);
+    }else if (in_value < 0) {
+        out_value -= fmin(out_value - in_value , acceleration);
+    }else {
+        if (out_value > 0) {
+            out_value -= fmin(out_value - in_value , acceleration);
+        }else if (out_value < 0) {
+            out_value += fmin(in_value - out_value , acceleration);
+        }
+    }
+    out_value = max_data (max_value , out_value);
+    return out_value;
+}
+
+/**
+ * @brief 限制数据范围
+ * @param max       最大值
+ * @param user_data 用户数据
+ * @return 限制后的数据
+ */
+
+
+
 
 /**
  * @brief 用户数据处理
@@ -78,35 +98,34 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
 
     /* 遥控器数据处理 */
     user_holder->key_mode = user_VT03->mode_sw + keyboard_shoot_mode;
-    if (user_VT03->mouse_left == 1 || user_VT03->mouse_right == 1) {
         if (user_VT03->mouse_left ==0 && user_VT03->mouse_right == 1) {
             user_holder->key_mode = 2; /* 右键模式 */
         }else if (user_VT03->mouse_left == 1 && user_VT03->mouse_right == 0){
             user_holder->key_mode = 1; /* 左键模式 */
         }
-    }
 
-    user_holder->key_left = max_data(1 , user_VT03->fn1 + VT03_IsKeyboardDown(KEY_Q));
+    user_holder->key_left  = max_data(1 ,user_VT03->fn1 + VT03_IsKeyboardDown(KEY_Q));
     user_holder->key_right = max_data(1 ,user_VT03->fn2 + VT03_IsKeyboardDown(KEY_E));
-    user_holder->key_shoot = max_data(1 ,user_VT03->trigger + user_VT03->mouse_left + user_VT03->mouse_right);
+    user_holder->key_shoot = max_data(1 ,user_VT03->trigger + user_VT03->mouse_left );
     user_holder->key_back  = max_data(1 ,user_holder->key_right = user_VT03->fn2);
 
     if (user_holder->key_mode == 2) { /* PC 控制模式 */
-        user_holder->holder_pitch = max_data(660 ,user_VT03->ch1 + user_PC->holder_pitch + user_VT03->mouse_y );
-        user_holder->d_theta_turret = max_data(660 , user_VT03->ch0 + user_PC->holder_yaw   + user_VT03->mouse_x );
-    }else if(user_holder->key_mode == 1 || user_holder->key_mode == 0){ /* 遥控器控制模式 */
-        user_holder->holder_pitch = max_data(660 ,user_VT03->ch1 + user_VT03->mouse_y ) ;
-        user_holder->d_theta_turret = max_data(660 , user_VT03->ch0 + user_VT03->mouse_x );
+        user_holder->holder_pitch   = max_data(660 ,user_VT03->ch1  + user_VT03->mouse_y );
+        user_holder->d_theta_turret = max_data(660 ,user_VT03->ch0 + user_PC->holder_yaw + user_VT03->mouse_x );
+        user_holder->pitch_angle    = max_data(75  ,user_PC->holder_pitch * 3.33f + 0.3f * 0.0008f * user_holder->holder_pitch);
+    }else { /* 遥控器控制模式 */
+        user_holder->holder_pitch   = max_data(660 ,user_VT03->ch1 + user_VT03->mouse_y ) ;
+        user_holder->d_theta_turret = max_data(660 ,user_VT03->ch0 + user_VT03->mouse_x );
+        user_holder->pitch_angle    = max_data(75 , user_holder->pitch_angle + 0.3f*0.0008f*user_holder->holder_pitch);
     }
 
-    user_holder->v_x =user_VT03->ch2 - VT03_IsKeyboardDown(KEY_S)*660 + VT03_IsKeyboardDown(KEY_W)*660;
-    user_holder->v_y =user_VT03->ch3 - VT03_IsKeyboardDown(KEY_A)*660 + VT03_IsKeyboardDown(KEY_D)*660;
+    user_holder->v_x = user_VT03->ch2 - VT03_IsKeyboardDown(KEY_S)*660 + VT03_IsKeyboardDown(KEY_W)*660;
+    user_holder->v_y = user_VT03->ch3 - VT03_IsKeyboardDown(KEY_A)*660 + VT03_IsKeyboardDown(KEY_D)*660;
 
     if (user_holder->key_left != 0 && user_holder->user_time_flash % 1000 == 0) {
         user_holder->w_theta_chassis = user_VT03->wheel + user_VT03->mouse_z;
     }
 
-    user_holder->pitch_angle = max_data(75 ,user_holder->pitch_angle + 0.3f*0.0008f*user_holder->holder_pitch);
 
     /* 速度限制 */
     if (VT03_IsKeyboardDown(KEY_SHIFT)) {
@@ -118,39 +137,8 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
     }
 
     if (user_holder->user_time_flash % 10 == 0 ) {
-        /* X轴加速逻辑 */
-        if (user_holder->v_x > 0 ) {
-            user_holder->value_x += user_holder->anac.a;
-        }else if (user_holder->v_x < 0 ){
-            user_holder->value_x -= user_holder->anac.a;
-        }
-
-        /* X轴减速逻辑 */
-        if (user_holder->value_x >0 && user_holder->v_x == 0) {
-            user_holder->value_x -=  user_holder->anac.a;
-        }else if (user_holder->value_x <0 && user_holder->v_x == 0) {
-            user_holder->value_x +=  user_holder->anac.a;
-        }else if(user_holder->v_x == 0 && user_holder->user_value <= 20) {
-            user_holder->value_x = 0;
-        }
-
-        /* Y轴加速逻辑 */
-        if (user_holder->v_y >0 ) {
-            user_holder->value_y += user_holder->anac.a;
-        }else if (user_holder->v_y < 0 ) {
-            user_holder->value_y -= user_holder->anac.a;
-        }
-
-        /* Y轴减速逻辑 */
-        if (user_holder->value_y >0 && user_holder->v_y == 0) {
-            user_holder->value_y -=  user_holder->anac.a;
-        }else if (user_holder->value_y <0 && user_holder->v_y == 0) {
-            user_holder->value_y +=  user_holder->anac.a;
-        }else if(user_holder->v_y == 0 && user_holder->user_value <= 20) {
-            user_holder->value_y = 0;
-        }
+        user_holder->value_x = get_value(user_holder->value_x , user_holder->v_x , user_holder->anac.a , user_holder->user_value , user_holder->value_max);
+        user_holder->value_y = get_value(user_holder->value_y , user_holder->v_y , user_holder->anac.a , user_holder->user_value , user_holder->value_max);
     }
 
-    user_holder->value_y = max_data(user_holder->value_max , user_holder->value_y);
-    user_holder->value_x = max_data(user_holder->value_max , user_holder->value_x);
 }

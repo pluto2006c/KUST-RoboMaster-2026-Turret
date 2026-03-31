@@ -52,12 +52,15 @@ UART_HandleTypeDef huart7;
 UART_HandleTypeDef huart8;
 UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart3;
+UART_HandleTypeDef huart6;
 DMA_HandleTypeDef hdma_uart7_rx;
 DMA_HandleTypeDef hdma_uart8_rx;
 DMA_HandleTypeDef hdma_uart8_tx;
 DMA_HandleTypeDef hdma_usart1_rx;
 DMA_HandleTypeDef hdma_usart3_rx;
 DMA_HandleTypeDef hdma_usart3_tx;
+DMA_HandleTypeDef hdma_usart6_rx;
+DMA_HandleTypeDef hdma_usart6_tx;
 
 /* USER CODE BEGIN PV */
 
@@ -74,6 +77,7 @@ static void MX_TIM12_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_UART7_Init(void);
+static void MX_USART6_UART_Init(void);
 static void MX_UART8_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -121,13 +125,14 @@ int main(void)
   MX_TIM2_Init();
   MX_USART3_UART_Init();
   MX_UART7_Init();
+  MX_USART6_UART_Init();
   MX_UART8_Init();
   /* USER CODE BEGIN 2 */
   JScope_Init(&htim2);
 
   //串口初始化
   UART_Init(&vt03_uart, &huart3);
-  UART_Init(&PC_uart, &huart8);
+  UART_Init(&PC_uart, &huart8 );
   UART_Init(&hwt906_uart, &huart7);
 
   LED_Init(&user_red_led, LED_RED_GPIO_Port, LED_RED_Pin, 1);
@@ -528,6 +533,39 @@ static void MX_USART3_UART_Init(void)
 }
 
 /**
+  * @brief USART6 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART6_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART6_Init 0 */
+
+  /* USER CODE END USART6_Init 0 */
+
+  /* USER CODE BEGIN USART6_Init 1 */
+
+  /* USER CODE END USART6_Init 1 */
+  huart6.Instance = USART6;
+  huart6.Init.BaudRate = 921600;
+  huart6.Init.WordLength = UART_WORDLENGTH_8B;
+  huart6.Init.StopBits = UART_STOPBITS_1;
+  huart6.Init.Parity = UART_PARITY_NONE;
+  huart6.Init.Mode = UART_MODE_TX_RX;
+  huart6.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart6.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart6) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART6_Init 2 */
+
+  /* USER CODE END USART6_Init 2 */
+
+}
+
+/**
   * Enable DMA controller clock
   */
 static void MX_DMA_Init(void)
@@ -553,9 +591,15 @@ static void MX_DMA_Init(void)
   /* DMA1_Stream6_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
-  /* DMA2_Stream5_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA2_Stream5_IRQn);
+  /* DMA2_Stream1_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
+  /* DMA2_Stream2_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn);
+  /* DMA2_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA2_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA2_Stream6_IRQn);
 
 }
 
