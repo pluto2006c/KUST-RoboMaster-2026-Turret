@@ -26,9 +26,9 @@ static int get_value(int16_t out_value ,int16_t in_value ,int16_t acceleration ,
         out_value -= fminf(out_value - in_value , acceleration);
     }else {
         if (out_value > 0) {
-            out_value -= fminf(out_value - in_value , acceleration);
+            out_value -= fminf(out_value - in_value , 5*acceleration);
         }else if (out_value < 0) {
-            out_value += fminf(in_value - out_value , acceleration);
+            out_value += fminf(in_value - out_value , 5*acceleration);
         }
     }
     out_value = max_data (max_value , out_value);
@@ -115,17 +115,22 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
     user_holder->key_back  = max_data(1 ,user_holder->key_right = user_VT03->fn2);
 
     if (user_holder->key_mode == 2) { /* PC 控制模式 */
-        user_holder->holder_pitch   = max_data(660 ,user_VT03->ch1  - user_VT03->mouse_y );
-        user_holder->d_theta_turret = max_data(360*600 ,user_VT03->ch0*600 / 1320 / 5  + user_PC->holder_yaw *300 + user_VT03->mouse_x *60 / 1320 / 5 );
+        user_holder->holder_pitch   = max_data(660 ,user_VT03->ch1  - user_VT03->mouse_y * 2.5f );
+        user_holder->d_theta_turret = max_data(360*600 ,user_VT03->ch0*600 / 1320 / 5  + user_PC->holder_yaw *300 + user_VT03->mouse_x *600 / 1320 / 2 );
         user_holder->pitch_angle    = max_data(75  ,user_PC->holder_pitch * 3.33f + 0.3f * 0.0008f * user_holder->holder_pitch);
     }else { /* 遥控器控制模式 */
-        user_holder->holder_pitch   = max_data(660 ,user_VT03->ch1 - user_VT03->mouse_y ) ;
-        user_holder->d_theta_turret = max_data(660 ,user_VT03->ch0*600 / 1320 / 5 + user_VT03->mouse_x *600 / 1320 / 5 );
+        user_holder->holder_pitch   = max_data(660 ,user_VT03->ch1 - user_VT03->mouse_y * 2.5f) ;
+        user_holder->d_theta_turret = max_data(660 ,user_VT03->ch0*600 / 1320 / 5 + user_VT03->mouse_x *600 / 1320 / 2 );
         user_holder->pitch_angle    = max_data(75 , user_holder->pitch_angle + 0.3f*0.0008f*user_holder->holder_pitch);
     }
 
-    user_holder->v_x = user_VT03->ch2 - VT03_IsKeyboardDown(KEY_S)*660 + VT03_IsKeyboardDown(KEY_W)*660;
-    user_holder->v_y = user_VT03->ch3 - VT03_IsKeyboardDown(KEY_A)*660 + VT03_IsKeyboardDown(KEY_D)*660;
+    if (user_holder->user_time_flash % 10 == 0) {
+        user_holder->v_x += user_VT03->ch2 / 330 - VT03_IsKeyboardDown(KEY_S) *2 + VT03_IsKeyboardDown(KEY_W) *2;
+        user_holder->v_y += user_VT03->ch3 / 330 - VT03_IsKeyboardDown(KEY_A) *2 + VT03_IsKeyboardDown(KEY_D) *2;
+    }
+
+
+
 
 
     //小陀螺模式管理
@@ -136,12 +141,12 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
     }
 
     if (spinning_top_mode ==1) {
-        uint16_t top_range = 660 - (-660);
+        uint16_t top_range = 660 - 200;
         if (user_holder ->user_time_flash % speed_change_delay == 0 ) {
             srand(HAL_GetTick());
             speed_change_delay = (rand() % top_range + 220) * 100;
         }
-        user_holder->w_theta_chassis = get_value(user_holder->w_theta_chassis ,rand() % top_range , (rand() % top_range)/user_holder->w_theta_chassis , user_holder->w_theta_chassis ,660);;
+        user_holder->w_theta_chassis = get_value(user_holder->w_theta_chassis ,rand() % top_range , (rand() % top_range)/user_holder->w_theta_chassis , user_holder->w_theta_chassis ,330);;
     }else {
         if (user_holder->key_left == 1 ) {
             user_holder->w_theta_chassis = user_VT03->wheel;
@@ -163,7 +168,7 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
         user_holder->value_max = 440;
     }
 
-    if (user_holder->user_time_flash % 10 == 0 ) {
+    if (user_holder->user_time_flash % 50 == 0 ) {
         user_holder->value_x = get_value(user_holder->value_x , user_holder->v_x , user_holder->anac.a , user_holder->user_value , user_holder->value_max);
         user_holder->value_y = get_value(user_holder->value_y , user_holder->v_y , user_holder->anac.a , user_holder->user_value , user_holder->value_max);
     }

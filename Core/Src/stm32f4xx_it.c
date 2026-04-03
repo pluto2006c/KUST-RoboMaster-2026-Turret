@@ -318,10 +318,10 @@ void SysTick_Handler(void)
     user_can_2_send_frame_2 [1] = (uint8_t) (user_holder_data.w_theta_chassis >> 8);
     user_can_2_send_frame_2 [2] = (uint8_t) (user_holder_data.d_theta_turret  >> 0);
     user_can_2_send_frame_2 [3] = (uint8_t) (user_holder_data.d_theta_turret  >> 8);
-    user_can_2_send_frame_2 [4] = (uint8_t) ((int16_t)((float)user_holder_data.value_y/660*4000) >> 0);
-    user_can_2_send_frame_2 [5] = (uint8_t) ((int16_t)((float)user_holder_data.value_y/660*4000) >> 8);
-    user_can_2_send_frame_2 [6] = (uint8_t) ((int16_t)((float)user_holder_data.value_x/660*4000) >> 0);
-    user_can_2_send_frame_2 [7] = (uint8_t) ((int16_t)((float)user_holder_data.value_x/660*4000) >> 8);
+    user_can_2_send_frame_2 [4] = (uint8_t) ((int16_t)((float)user_holder_data.value_y/660*1200) >> 0);
+    user_can_2_send_frame_2 [5] = (uint8_t) ((int16_t)((float)user_holder_data.value_y/660*1200) >> 8);
+    user_can_2_send_frame_2 [6] = (uint8_t) ((int16_t)((float)user_holder_data.value_x/660*1200) >> 0);
+    user_can_2_send_frame_2 [7] = (uint8_t) ((int16_t)((float)user_holder_data.value_x/660*1200) >> 8);
 
     CAN_Send(&user_can_2, Chassis_data_ID_2 , user_can_2_send_frame_2, 8);
 
