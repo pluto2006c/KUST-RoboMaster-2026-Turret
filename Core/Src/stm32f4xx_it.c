@@ -254,25 +254,27 @@ void SysTick_Handler(void)
   //发射机构控制
   if (shoot_mode == 3) {
 
-    //全自动连发
-    if (user_holder_data.key_mode == 2 ) {
-      if (user_PC.shoot_delay != 0xFFFF && ai_shoot_mode == 0) {
-        time_flash = user_time_counyer;
-        ai_shoot_mode = 1 ;
-      }
-      if (ai_shoot_mode == 1 && user_time_counyer - time_flash == user_PC.shoot_delay && shoot_heat >= 10) {
-        DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
-        shoot_heat -= 10 ;
-        ai_shoot_mode = 0 ;
-      }
-    }
 
 
     //连发
     if (user_holder_data.key_mode == 1 || user_holder_data.key_mode == 2){
-      DJI_Motor_Set_State(&RW_M3508, 6500);
-      DJI_Motor_Set_State(&LW_M3508, -6500);
-      if (user_holder_data.key_shoot == 1 && ai_shoot_mode == 0) {
+      DJI_Motor_Set_State(&RW_M3508, 6800);
+      DJI_Motor_Set_State(&LW_M3508, -6800);
+
+      //全自动连发
+      if (user_holder_data.key_mode == 2  && shoot_heat >= 10) {
+        if (user_PC.shoot_delay != 0xFFFF && ai_shoot_mode == 0) {
+          time_flash = user_time_counyer;
+          ai_shoot_mode = 1 ;
+        }
+        if (ai_shoot_mode == 1 && user_time_counyer - time_flash >= user_PC.shoot_delay) {
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
+          shoot_heat -= 10 ;
+          ai_shoot_mode = 0 ;
+        }
+      }
+
+      if (user_holder_data.key_shoot == 1 ) {
         //发射频率计时
         if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {
           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));

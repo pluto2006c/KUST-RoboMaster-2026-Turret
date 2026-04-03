@@ -37,7 +37,7 @@ PWM_DRIVES user_buzzer = {0};
 PID_Controller TP_M2006_Controller = {0};
 PID_Controller RW_M3508_Controller = {0};
 PID_Controller LW_M3508_Controller = {0};
-PID_Tolerance_Controller GM_6020_Controller = {0};
+LADRC_Controller GM_6020_Controller = {0};
 
 // 电机注册
 DJI_MOTOR_DRIVES TP_M2006 = {0};

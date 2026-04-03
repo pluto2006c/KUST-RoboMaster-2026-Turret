@@ -36,6 +36,7 @@ static void PC_UartCallback(void* user_uart) {
 void PC_Init(PC_DRIVES* User_PC , UART_DRIVES* PC_UART) {
     user_PC_drive = User_PC;
     User_PC->user_uart = PC_UART;
+    User_PC->shoot_delay = 0xFFFF;
     /* 注册串口回调函数 */
     UART_RegisterCallback(User_PC->user_uart, PC_UartCallback);
 }

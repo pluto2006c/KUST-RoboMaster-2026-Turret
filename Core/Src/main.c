@@ -154,14 +154,13 @@ int main(void)
   PC_Init(&user_PC , &PC_uart);
 
 
-
   PID_Init(&TP_M2006_Controller , 10.0f, 0.0f, 400.0f ,10000 ,0);
   DJI_Motor_Init(&TP_M2006, &user_can_1, 4 , DJI_Motor_Get_Angle(&TP_M2006) , M2006 , Rotor_angle , (CONTROLLER_INTERFACE*)&TP_M2006_Controller);
-  PID_Init(&RW_M3508_Controller , 20.0f, 0.0f, 5.0f ,10000 ,0);
-  PID_Init(&LW_M3508_Controller , 20.0f, 0.0f, 5.0f ,10000 ,0);
+  PID_Init(&RW_M3508_Controller , 20.0f, 0.0f, 15.0f ,10000 ,0);
+  PID_Init(&LW_M3508_Controller , 20.0f, 0.0f, 15.0f ,10000 ,0);
   DJI_Motor_Init(&RW_M3508, &user_can_1, 3 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&RW_M3508_Controller);
   DJI_Motor_Init(&LW_M3508, &user_can_1, 1 , 0 , M3508_gear , Rotor_speed , (CONTROLLER_INTERFACE*)&LW_M3508_Controller);
-  PID_Tolerance_Init(&GM_6020_Controller , 125.0f, 0.0f, 17500.0f , 16000 ,0.0f ,100.0f);
+  LADRC_Init(&GM_6020_Controller , 26.0f, 390.0f, 24.0f , 3.5f ,12000.0f ,0.001f);
   DJI_Motor_Init(&PICH_GM6020, &user_can_1, 2 , 1980 , GM6020 , Rotor_angle , (CONTROLLER_INTERFACE*)&GM_6020_Controller);
 
 
