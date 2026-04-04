@@ -206,25 +206,29 @@ void SysTick_Handler(void)
   //PICH轴控制
   DJI_Motor_Set_State(&PICH_GM6020,  (float)user_holder_data.pitch_angle);
   //计时器
-  static int user_time_counyer = 100000 ;
+  static int user_time_counyer = 0 ;
+  static int user_shoot_flash = 0;
   static uint8_t time_flash = 0 ;
   user_holder_data.user_time_flash = user_time_counyer;
 
-  if (user_time_counyer == 1000) {
+  if (user_time_counyer <= 100000) {
     user_time_counyer = 0 ;
   }else {
     user_time_counyer ++ ;
   }
 
+  if (user_time_counyer > 99999) {
+    user_shoot_flash = 1 ;
+  }
 
 
   //热量管理
   static float shoot_heat = 0 ;
   if (user_time_counyer % 100 == 0) {
-    if (shoot_heat <= 198.2) {
+    if (shoot_heat <= 78.2) {
       shoot_heat += 1.2f ;
     }else {
-      shoot_heat = 200 ;
+      shoot_heat = 80 ;
     }
   }
 
@@ -253,13 +257,10 @@ void SysTick_Handler(void)
 
   //发射机构控制
   if (shoot_mode == 3) {
-
-
-
     //连发
     if (user_holder_data.key_mode == 1 || user_holder_data.key_mode == 2){
-      DJI_Motor_Set_State(&RW_M3508, 6800);
-      DJI_Motor_Set_State(&LW_M3508, -6800);
+      DJI_Motor_Set_State(&RW_M3508, 6300);
+      DJI_Motor_Set_State(&LW_M3508, -6300);
 
       //全自动连发
       if (user_holder_data.key_mode == 2  && shoot_heat >= 10) {
@@ -276,7 +277,7 @@ void SysTick_Handler(void)
 
       if (user_holder_data.key_shoot == 1 ) {
         //发射频率计时
-        if (user_time_counyer % 33 == 0 && shoot_heat >= 10 ) {
+        if (user_time_counyer % 100 == 0 && shoot_heat >=  10 ) {
           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
           shoot_heat -= 10 ;
         }
@@ -289,8 +290,16 @@ void SysTick_Handler(void)
     }
 
     if (user_holder_data.key_mode == 0){
-      DJI_Motor_Set_State(&RW_M3508, 0);
-      DJI_Motor_Set_State(&LW_M3508, 0);
+      if (user_holder_data.key_shoot == 1 && user_holder_data.key_back == 1) {
+        DJI_Motor_Set_State(&RW_M3508, 2000);
+        DJI_Motor_Set_State(&LW_M3508, -2000);
+        if (user_time_counyer % 33 == 0 ) {
+          DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
+        }
+      }else {
+        DJI_Motor_Set_State(&RW_M3508, 0);
+        DJI_Motor_Set_State(&LW_M3508, 0);
+      }
     }
   }
 
@@ -298,7 +307,7 @@ void SysTick_Handler(void)
 
   //底盘通信
 
-  if (user_time_counyer % 2) {
+  if (user_time_counyer % 2 == 0) {
     uint8_t user_can_2_send_frame_1[8] = {0};
 
     user_can_2_send_frame_1 [0] = (uint8_t) (user_holder_data.w_theta_chassis >> 0);
@@ -341,19 +350,24 @@ void SysTick_Handler(void)
     CAN_Send(&user_can_2, Chassis_data_ID_3 , user_can_2_send_frame_3, 8);
   }
 
-  char angle_z[8] = {0};
-  char angle_data_head[2] = { 0xEB , 0x90 };
-  char angle_data_tail[2] = { 0x90 , 0xEB };
-  angle_z[0] = angle_data_head[0];
-  angle_z[1] = angle_data_head[1];
-  const float inv_angle_z = -user_holder_data.angle_z;
-  angle_z[2] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 0);
-  angle_z[3] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 8);
-  angle_z[4] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 16);
-  angle_z[5] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 24);
-  angle_z[6] = angle_data_tail[0];
-  angle_z[7] = angle_data_tail[1];
-  UART_Send(user_PC.user_uart, angle_z , 8);
+  if (user_shoot_flash == 1) {
+    char angle_z[8] = {0};
+    char angle_data_head[2] = { 0xEB , 0x90 };
+    char angle_data_tail[2] = { 0x90 , 0xEB };
+    angle_z[0] = angle_data_head[0];
+    angle_z[1] = angle_data_head[1];
+    const float inv_angle_z = -user_holder_data.angle_z;
+    angle_z[2] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 0);
+    angle_z[3] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 8);
+    angle_z[4] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 16);
+    angle_z[5] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 24);
+    angle_z[6] = angle_data_tail[0];
+    angle_z[7] = angle_data_tail[1];
+    UART_Send(user_PC.user_uart, angle_z , 8);
+  }
+
+
+
 
 
 
