@@ -43,9 +43,9 @@ typedef struct {
 
 typedef enum {
     hwt906_time              = 0x50 ,
-    hwt906_acceleration      = 0x51,
-    hwt906_angular_velocity  = 0x52,
-    hwt906_angle             = 0x53,
+    hwt906_acceleration      = 0x51 ,
+    hwt906_angular_velocity  = 0x52 ,
+    hwt906_angle             = 0x53 ,
 }HWT906_TYPE ;
 
 

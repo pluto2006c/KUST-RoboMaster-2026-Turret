@@ -1,5 +1,5 @@
 /* 包含头文件 ----------------------------------------------------------------*/
-#include "../user_dji_vt03.h"
+#include "../../User_remote/user_dji_vt03.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -54,7 +54,14 @@ static void VT03_UartCallback(void* user_uart);
 
 /* 函数体 --------------------------------------------------------------------*/
 
-
+static float max_data(float max , float user_data) {
+	if (user_data >= max) {
+		user_data = max;
+	} else if (user_data <= -max) {
+		user_data = -max;
+	}
+	return user_data;
+}
 
 
 /**
@@ -111,6 +118,28 @@ uint8_t VT03_VerifyCRC16(uint8_t* p_msg, uint16_t len) {
 }
 
 /**
+ * @brief 虚拟遥控器映射函数
+ * @param user_remote 虚拟遥控器映射数据暂存结构体指针
+ * @note  该函数必须在 VT03_UartCallback() 中被调用，以将解析后的遥控器数据映射到用户定义的虚拟遥控器结构体中
+ */
+static void DJI_VTO3_Process(USER_REMOTE* user_remote) {
+	user_remote->chassis_x     = max_data(660,vt03_drive->ch0 + 660*VT03_IsKeyboardDown(KEY_W) - 660*VT03_IsKeyboardDown(KEY_S));
+	user_remote->chassis_y     = max_data(660,vt03_drive->ch1 + 660*VT03_IsKeyboardDown(KEY_D) - 660*VT03_IsKeyboardDown(KEY_A));;
+	user_remote->yaw           = max_data(660,vt03_drive->ch2 + vt03_drive->mouse_x);
+	user_remote->pitch         = max_data(660,vt03_drive->ch3 + vt03_drive->mouse_y);
+	user_remote->wheel         = max_data(660,vt03_drive->wheel + vt03_drive->mouse_z);
+	user_remote->shoot_by_user = max_data(1,vt03_drive->trigger + vt03_drive->mouse_left);
+	user_remote->control_mode  = vt03_drive->mode_sw ;
+	if ((user_remote->control_mode == 2 && user_remote->shoot_by_user == 1) || vt03_drive->mouse_right == 1) {
+		//自动开火
+		user_remote->shoot_by_ai = 2;
+	}
+	user_remote->key_middle = max_data(1,vt03_drive->mouse_middle + vt03_drive->pause);
+	user_remote->custom_key[1] = vt03_drive->fn1;
+	user_remote->custom_key[2] = vt03_drive->fn2;
+}
+
+/**
  * @brief UART接收回调函数
  * @param user_uart UART驱动指针
  */
@@ -130,25 +159,26 @@ static void VT03_UartCallback(void* user_uart) {
     }
 
     // 解析遥控器通道数据
-    vt03_drive->ch0 = ((uint16_t)(buf[2]>>0 | buf[3]<<8) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
-    vt03_drive->ch1 = ((uint16_t)(buf[3]>>3 | buf[4]<<5) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
-    vt03_drive->ch2 = ((uint16_t)(buf[4]>>6 | buf[5]<<2 | buf[6]<< 10) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
-    vt03_drive->ch3 = ((uint16_t)(buf[6]>>1 | buf[7]<<7) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
-    vt03_drive->mode_sw = (buf[7]>>4) & 0b00000011;
-    vt03_drive->pause = (buf[7]>>6) & 0b00000001;
-    vt03_drive->fn1 = (buf[7]>>7) & 0b00000001;
-    vt03_drive->fn2 = (buf[8] & 0b00000001);
-    vt03_drive->wheel = ((uint16_t)(buf[8]>>1 | buf[9]<<7) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
-	vt03_drive->trigger = (buf[9]>>4) & 0b00000001;
-	vt03_drive->mouse_x = ((uint16_t)(buf[10]>>0 | buf[11]<<8 )) ;
-	vt03_drive->mouse_y = ((uint16_t)(buf[12]>>0 | buf[13]<<8 )) ;
-	vt03_drive->mouse_z = (((uint16_t)(buf[14]>>0 | buf[15]<<8 ))*660/32768) ;
-	vt03_drive->mouse_left = ((uint8_t)(buf[16]>>0) & 0b00000011) ;
-	vt03_drive->mouse_right = ((uint8_t)(buf[16]>>2) & 0b00000011) ;
+    vt03_drive->ch0          = ((uint16_t)(buf[2]>>0 | buf[3]<<8) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
+    vt03_drive->ch1          = ((uint16_t)(buf[3]>>3 | buf[4]<<5) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
+    vt03_drive->ch2          = ((uint16_t)(buf[4]>>6 | buf[5]<<2 | buf[6]<< 10) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
+    vt03_drive->ch3          = ((uint16_t)(buf[6]>>1 | buf[7]<<7) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
+    vt03_drive->mode_sw      = (buf[7]>>4) & 0b00000011;
+    vt03_drive->pause        = (buf[7]>>6) & 0b00000001;
+    vt03_drive->fn1          = (buf[7]>>7) & 0b00000001;
+    vt03_drive->fn2          = (buf[8] & 0b00000001);
+    vt03_drive->wheel        = ((uint16_t)(buf[8]>>1 | buf[9]<<7) & 0b0000011111111111) - DJI_VT03_CH_OFFSET;
+	vt03_drive->trigger      = (buf[9]>>4) & 0b00000001;
+	vt03_drive->mouse_x      = ((uint16_t)(buf[10]>>0 | buf[11]<<8 )) ;
+	vt03_drive->mouse_y      = ((uint16_t)(buf[12]>>0 | buf[13]<<8 )) ;
+	vt03_drive->mouse_z      = (((uint16_t)(buf[14]>>0 | buf[15]<<8 ))*660/32768) ;
+	vt03_drive->mouse_left   = ((uint8_t)(buf[16]>>0) & 0b00000011) ;
+	vt03_drive->mouse_right  = ((uint8_t)(buf[16]>>2) & 0b00000011) ;
 	vt03_drive->mouse_middle = ((uint8_t)(buf[16]>>4) & 0b00000011) ;
 	// 解析键盘数据
     // 解析键盘数据
-    vt03_drive->key_value = (uint16_t)(buf[17] >> 0 | buf[18] << 8);
+    vt03_drive->key_value    = (uint16_t)(buf[17] >> 0 | buf[18] << 8);
+	DJI_VTO3_Process(&user_device_remote[vt03_drive->remote_num]);
 }
 
 /**
@@ -159,4 +189,6 @@ void DJI_VT03_Init(VT03_DRIVES* User_vt03 , UART_DRIVES* User_uart) {
     vt03_drive = User_vt03;
 	User_vt03->user_uart = User_uart;
 	UART_RegisterCallback(User_vt03->user_uart, VT03_UartCallback);
+	User_vt03->remote_num = user_device_remote_num;
+	user_device_remote_num++;
 }

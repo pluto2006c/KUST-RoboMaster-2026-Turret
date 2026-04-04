@@ -5,7 +5,7 @@
 #include <math.h>
 #include "../../User_Drives/user_uart.h"
 #include "../../User_Drives/user_HWT906.h"
-#include "../../User_Drives/user_dji_vt03.h"
+#include "../../User_Drives/User_remote/user_dji_vt03.h"
 #include "../../User_Application/PC_communication.h"
 #include <time.h>
 /*类定义----------------------------------------------------------------------*/
@@ -34,7 +34,7 @@ typedef struct {
     int16_t value_x;
     int16_t value_y;
     uint16_t value_max;
-    uint16_t user_time_flash;
+    uint32_t user_time_flash;
     uint16_t user_value;
     ANAC anac;
 }Holder_Data;

@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#include "bsp.h"
+
 /*私有变量---------------------------------------------------------------------------*/
 
 
@@ -20,15 +22,16 @@ static float max_data(float max , float user_data) {
 }
 
 static int get_value(int16_t out_value ,int16_t in_value ,int16_t acceleration ,int16_t total_value ,int16_t max_value) {
+    uint16_t toutal_value = sqrt((in_value - out_value) * (in_value - out_value));
     if (in_value > 0) {
-        out_value += fminf(in_value - out_value , acceleration);
+        out_value += fminf(toutal_value , acceleration);
     }else if (in_value < 0) {
-        out_value -= fminf(out_value - in_value , acceleration);
+        out_value -= fminf(toutal_value , acceleration);
     }else {
         if (out_value > 0) {
-            out_value -= fminf(out_value - in_value , 5*acceleration);
+            out_value -= fminf(toutal_value , 10 * acceleration);
         }else if (out_value < 0) {
-            out_value += fminf(in_value - out_value , 5*acceleration);
+            out_value += fminf(toutal_value , 10 * acceleration);
         }
     }
     out_value = max_data (max_value , out_value);
@@ -58,6 +61,7 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
     static uint8_t get_angel_mode = 0 ; /* 获取角度模式 */
     static uint16_t spinning_top_mode = 0;
     static uint16_t speed_change_delay = 0 ;
+    static int16_t chassis_value_a = 0;
 
 
 
@@ -81,7 +85,7 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
         user_holder->anac.a = 1;
 
     /* 角度处理 */
-    if (get_angel_mode == 0 && user_HWT906->user_angle.angle_z != 0) {
+    if (get_angel_mode == 0 && user_HWT906->user_angle.angle_z != 0 ) {
         old_angle_z= user_HWT906->user_angle.angle_z;
         get_angel_mode = 1 ;
     }
@@ -99,6 +103,7 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
     } else if (user_holder->angle_z < -180) {
         user_holder->angle_z += 360;
     }
+
 
 
     /* 遥控器数据处理 */
@@ -124,9 +129,9 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
         user_holder->pitch_angle    = max_data(75 , user_holder->pitch_angle + 0.3f*0.0008f*user_holder->holder_pitch);
     }
 
-    if (user_holder->user_time_flash % 10 == 0) {
-        user_holder->v_x += user_VT03->ch2 / 330 - VT03_IsKeyboardDown(KEY_S) *2 + VT03_IsKeyboardDown(KEY_W) *2;
-        user_holder->v_y += user_VT03->ch3 / 330 - VT03_IsKeyboardDown(KEY_A) *2 + VT03_IsKeyboardDown(KEY_D) *2;
+    if (user_holder->user_time_flash % 10 == 0 ) {
+        user_holder->v_x = user_VT03->ch2  - VT03_IsKeyboardDown(KEY_S) * 660  + VT03_IsKeyboardDown(KEY_W) * 660 ;
+        user_holder->v_y = user_VT03->ch3  - VT03_IsKeyboardDown(KEY_A) * 660  + VT03_IsKeyboardDown(KEY_D) * 660 ;
     }
 
 
@@ -140,22 +145,14 @@ void user_data_processing(Holder_Data* user_holder , VT03_DRIVES* user_VT03, HWT
         spinning_top_mode ++;
     }
 
-    if (spinning_top_mode ==1) {
-        uint16_t top_range = 660 - 200;
-        if (user_holder ->user_time_flash % speed_change_delay == 0 ) {
-            srand(HAL_GetTick());
-            speed_change_delay = (rand() % top_range + 220) * 100;
-        }
-        user_holder->w_theta_chassis = get_value(user_holder->w_theta_chassis ,rand() % top_range , (rand() % top_range)/user_holder->w_theta_chassis , user_holder->w_theta_chassis ,330);;
-    }else {
-        if (user_holder->key_left == 1 ) {
-            user_holder->w_theta_chassis = user_VT03->wheel;
-        }
+    chassis_value_a = 20 / user_holder->w_theta_chassis;
+    if (user_holder->key_left == 1 ) {
+        // user_holder->w_theta_chassis = get_value(user_holder->w_theta_chassis , user_VT03->wheel, chassis_value_a, user_holder->d_theta_turret , 660)   ;
+     user_holder->w_theta_chassis = user_VT03->wheel;
     }
 
-    if (spinning_top_mode > 1) {
-        spinning_top_mode = 0;
-    }
+
+
 
 
 

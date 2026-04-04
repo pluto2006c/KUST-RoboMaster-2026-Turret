@@ -6,7 +6,7 @@
 #include "../../SEGGER_RTT/SEGGER_RTT.h"
 #include "../../User_Drives/User_Motor/user_dji_motor.h"
 #include "../../User_Algorithm/User_Controller/user_pid.h"
-#include "../../User_Drives/user_dji_vt03.h"
+#include "../../User_Drives/User_remote/user_dji_vt03.h"
 #include "../../User_Drives/user_hwt906.h"
 #include "../../User_Application/PC_communication.h"
 #include "../../User_Application/Holder_Data_Processing.h"
@@ -46,6 +46,8 @@ extern LED_DRIVES user_green_led;
 extern CAN_DRIVES user_can_1;
 extern CAN_DRIVES user_can_2;
 
+float can_RX_callback( CAN_DRIVES* user_can);
+
 // 蜂鸣器
 #include "../../User_Drives/user_pwm.h"
 
@@ -67,8 +69,8 @@ extern UART_DRIVES vt03_uart;
 extern VT03_DRIVES user_vt03;
 
 //陀螺仪注册
-extern UART_DRIVES hwt906_uart;
-extern HWT906_DRIVES user_HWT906;
+extern UART_DRIVES hwt906_uart_chassis;
+extern HWT906_DRIVES user_HWT906_chassis;
 
 //电脑注册
 extern UART_DRIVES PC_uart;
@@ -77,5 +79,7 @@ extern PC_DRIVES user_PC;
 //全局数据包注册
 extern Holder_Data user_holder_data;
 
+//全局虚拟遥控器注册
+extern USER_REMOTE virtual_user_remote;
 
 #endif // USER_BSP_H

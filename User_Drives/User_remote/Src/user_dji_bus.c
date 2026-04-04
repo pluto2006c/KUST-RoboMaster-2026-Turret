@@ -1,4 +1,4 @@
-#include "../../Core/Inc/bsp.h"
+#include "../../../Core/Inc/bsp.h"
 #ifdef HAL_UART_MODULE_ENABLED
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "../user_dji_bus.h"
@@ -8,6 +8,31 @@ static DBUS_DRIVES *dbus_drive = NULL;
 static uint8_t dbus_buf[DBUS_BUF_LEN];
 
 /* 私有函数 ------------------------------------------------------------------*/
+
+
+static void DJI_Bus_Process(USER_REMOTE* user_remote) {
+    user_remote->chassis_x = dbus_drive->ch0 ;
+    user_remote->chassis_y = dbus_drive->ch1 ;
+    user_remote->yaw       = dbus_drive->ch2 ;
+    user_remote->pitch     = dbus_drive->ch3 ;
+    user_remote->wheel     = dbus_drive->roll;
+    user_remote->custom_key[1] = dbus_drive->sw1;
+    user_remote->custom_key[2] = dbus_drive->sw2;
+    if (dbus_drive->sw1 == 3 ) {
+        user_remote->control_mode = 1;
+        if (dbus_drive->sw2 == 1) {
+            user_remote->key_middle = 1;
+        }else {
+            user_remote->key_middle = 0;
+        }
+    }
+    if (dbus_drive->sw1 == 1 ) {
+        user_remote->control_mode = 0;
+    }
+    if (dbus_drive->sw1 == 2 ) {
+        user_remote->control_mode = 2;
+    }
+}
 
 /**
 * @brief 遥控器数据解析函数
@@ -24,6 +49,7 @@ static void rc_callback_handler(void) {
     dbus_drive->sw2  = ((dbus_buf[5] >> 4) & 0x0003) >> 0;
 
     dbus_drive->is_update = 1;
+    DJI_Bus_Process(&user_device_remote[dbus_drive->remote_num]);
 }
 
 /**
@@ -78,6 +104,8 @@ void DBUS_Init(DBUS_DRIVES* user_dbus, UART_HandleTypeDef* huart) {
 
     /* 使能 UART DMA 接收 */
     SET_BIT(huart->Instance->CR3, USART_CR3_DMAR);
+    user_dbus->remote_num = user_device_remote_num;
+    user_device_remote_num++;
 }
 
 /**

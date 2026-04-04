@@ -29,6 +29,19 @@ LED_DRIVES user_green_led = {0};
 CAN_DRIVES user_can_1 = {0};
 CAN_DRIVES user_can_2 = {0};
 
+//can接收函数注册
+float can_RX_callback( CAN_DRIVES* user_can) {
+    const CAN_DRIVES *can = (CAN_DRIVES*)user_can;
+    uint8_t receive_data[8];
+    if (user_can->rx_msg.StdId == Chassis_data_ID_3) {
+        for (uint8_t i = 0; i < 8; i++) {
+            receive_data[i] = can->rx_msg.Data[i];
+        }
+        user_HWT906_chassis.user_angle.angle_z = *(float*)&receive_data;
+    }
+    return user_HWT906_chassis.user_angle.angle_z;
+}
+
 // 蜂鸣器
 PWM_DRIVES user_buzzer = {0};
 
@@ -50,8 +63,10 @@ UART_DRIVES vt03_uart = {0};
 VT03_DRIVES user_vt03 = {0};
 
 //陀螺仪注册
-UART_DRIVES hwt906_uart = {0};
-HWT906_DRIVES user_HWT906 = {0};
+
+UART_DRIVES hwt906_uart_chassis = {0};
+
+HWT906_DRIVES user_HWT906_chassis = {0};
 
 //电脑注册
 UART_DRIVES PC_uart = {0};
@@ -59,3 +74,6 @@ PC_DRIVES user_PC = {0};
 
 //全局数据包注册
 Holder_Data user_holder_data = {0};
+
+//全局虚拟遥控器注册
+USER_REMOTE virtual_user_remote = {0};

@@ -3,7 +3,8 @@
 
 /* 包含头文件 ----------------------------------------------------------------*/
 #include "main.h"
-#include "user_uart.h"
+#include "../user_uart.h"
+#include "../../User_Drives/User_remote/user_remote.h"
 #include <stdbool.h>
 
 /* 常量定义 ------------------------------------------------------------------*/
@@ -69,6 +70,8 @@ typedef struct {
 
     //接收串口
     UART_DRIVES* user_uart;
+    //虚拟遥控器数据暂存结构体编号
+    uint8_t remote_num;
 } VT03_DRIVES;
 
 /* 函数声明 ------------------------------------------------------------------*/

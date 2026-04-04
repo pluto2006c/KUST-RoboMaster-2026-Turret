@@ -136,7 +136,8 @@ int main(void)
   //串口初始化
   UART_Init(&vt03_uart, &huart3);
   UART_Init(&PC_uart, &huart6 );
-  UART_Init(&hwt906_uart, &huart7);
+
+  UART_Init(&hwt906_uart_chassis, &huart8);
 
   LED_Init(&user_red_led, LED_RED_GPIO_Port, LED_RED_Pin, 1);
   LED_Init(&user_green_led, LED_GREEN_GPIO_Port, LED_GREEN_Pin, 1);
@@ -147,11 +148,13 @@ int main(void)
   //vt03初始化
   DJI_VT03_Init(&user_vt03 , &vt03_uart);
 
-  //陀螺仪初始化
-  HWT906_Init(&user_HWT906 ,&hwt906_uart);
+
 
   //PC串口初始化
   PC_Init(&user_PC , &PC_uart);
+
+  //遥控器初始化
+  user_remote_init(virtual_user_remote,ZhouZishun_Config);
 
 
   PID_Init(&TP_M2006_Controller , 10.0f, 0.0f, 400.0f ,10000 ,0);
