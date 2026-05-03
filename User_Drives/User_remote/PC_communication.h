@@ -4,7 +4,7 @@
 /*头文件包含-----------------------------------------*/
 #include "main.h"
 #include"../../User_Drives/user_uart.h"
-#include "../../User_Application/PC_communication.h"
+#include "../../User_Drives/User_remote/PC_communication.h"
 
 /*常量定义------------------------------------------*/
 

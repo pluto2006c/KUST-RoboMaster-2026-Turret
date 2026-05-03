@@ -72,8 +72,6 @@ HWT906_DRIVES user_HWT906_chassis = {0};
 UART_DRIVES PC_uart = {0};
 PC_DRIVES user_PC = {0};
 
-//全局数据包注册
-Holder_Data user_holder_data = {0};
 
 //全局虚拟遥控器注册
 USER_REMOTE virtual_user_remote = {0};

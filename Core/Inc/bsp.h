@@ -8,7 +8,7 @@
 #include "../../User_Algorithm/User_Controller/user_pid.h"
 #include "../../User_Drives/User_remote/user_dji_vt03.h"
 #include "../../User_Drives/user_hwt906.h"
-#include "../../User_Application/PC_communication.h"
+#include "../../User_Drives/User_remote/PC_communication.h"
 #include "../../User_Application/Holder_Data_Processing.h"
 #include "../../User_Algorithm/User_Controller/user_pid_tolerance.h"
 #include "../../User_Algorithm/User_Controller/user_ladrc.h"
@@ -76,8 +76,6 @@ extern HWT906_DRIVES user_HWT906_chassis;
 extern UART_DRIVES PC_uart;
 extern PC_DRIVES user_PC;
 
-//全局数据包注册
-extern Holder_Data user_holder_data;
 
 //全局虚拟遥控器注册
 extern USER_REMOTE virtual_user_remote;

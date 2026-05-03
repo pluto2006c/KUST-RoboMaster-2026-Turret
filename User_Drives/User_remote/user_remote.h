@@ -1,6 +1,8 @@
 #ifndef DJI_A_BOARD_USER_REMOTE_H
 #define DJI_A_BOARD_USER_REMOTE_H
 /*实体遥控器引入-----------------------------------------------------*/
+
+#include "../../User_remote/PC_communication.h"
 #include "../../User_Drives/User_remote/user_dji_bus.h"
 #include "../../User_Drives/User_remote/user_dji_vt03.h"
 
@@ -35,7 +37,7 @@ typedef struct {
 /* 函数声明 ------------------------------------------------------------------*/
 
 void user_remote_init(USER_REMOTE* my_remote ,const controller_config tatol_controller_config);
-void Mech_Operating_Config(void);
+void Mech_Operating_Config(void);//此函数必须放于滴答中断
 
 /*变量初始化--------------------------------------------------------------------*/
 extern USER_REMOTE user_device_remote[USER_REMOTE_NUM];

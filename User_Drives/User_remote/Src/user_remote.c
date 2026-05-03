@@ -51,8 +51,21 @@ static void data_fusion(void) {
 
 void user_remote_init(USER_REMOTE* my_remote ,const controller_config tatol_controller_config) {
     my_remote->remote_config = tatol_controller_config;
+    //配置软件定时器
+    user_time_counyer = 0 ;
+    //配置热量管理
+    shoot_heat = 0 ;
 }
 
 void Mech_Operating_Config(void) {
+
+    //软件计时器
+    if (user_time_counyer <= 1000000) {
+        user_time_counyer ++ ;
+    }else {
+        user_time_counyer = 0 ;
+    }
+
+    //配置执行函数
     virtual_user_remote->remote_config(virtual_user_remote);
 }

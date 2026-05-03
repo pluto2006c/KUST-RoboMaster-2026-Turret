@@ -59,7 +59,9 @@ set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F427IIHX_FLASH.ld
         User_Drives/User_remote/user_remote.h
         User_Drives/User_remote/Src/user_remote.c
         User_Drives/Controller_config/ZhouZishun.h
-        User_Drives/Controller_config/Src/ZhouZishun.c)
+        User_Drives/Controller_config/Src/ZhouZishun.c
+        User_Drives/Controller_config/Src/Configuration_Common_Function_Table.c
+        User_Drives/Controller_config/Configuration_Common_Function_Table.h)
 
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
 add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)

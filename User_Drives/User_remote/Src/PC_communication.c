@@ -1,5 +1,5 @@
 /* 包含头文件 ----------------------------------------------------------------*/
-#include "../../User_Application/PC_communication.h"
+#include "../PC_communication.h"
 
 /* 私有变量 ------------------------------------------------------------------*/
 static PC_DRIVES* user_PC_drive = NULL;
