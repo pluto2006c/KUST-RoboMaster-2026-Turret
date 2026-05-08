@@ -32,17 +32,20 @@ static void data_fusion(void) {
         virtual_user_remote->shoot_by_ai += user_device_remote[remote_num].shoot_by_ai;
         virtual_user_remote->control_mode = user_device_remote[remote_num].control_mode;
         virtual_user_remote->key_middle += user_device_remote[remote_num].key_middle;
+
         for (uint8_t key_num = 0; key_num < 14; key_num++) {
             virtual_user_remote->custom_key[key_num] += user_device_remote->custom_key[key_num];
         }
+
         virtual_user_remote->chassis_x = max_data(660.0f, virtual_user_remote->chassis_x);
         virtual_user_remote->chassis_y = max_data(660.0f, virtual_user_remote->chassis_y);
-        virtual_user_remote->yaw = max_data(660.0f, virtual_user_remote->yaw);
-        virtual_user_remote->pitch = max_data(660.0f, virtual_user_remote->pitch);
-        virtual_user_remote->wheel = max_data(660.0f, virtual_user_remote->wheel);
+        virtual_user_remote->yaw       = max_data(660.0f, virtual_user_remote->yaw);
+        virtual_user_remote->pitch     = max_data(660.0f, virtual_user_remote->pitch);
+        virtual_user_remote->wheel     = max_data(660.0f, virtual_user_remote->wheel);
         virtual_user_remote->shoot_by_user = max_data(1.0f, virtual_user_remote->shoot_by_user);
-        virtual_user_remote->shoot_by_ai = max_data(1.0f, virtual_user_remote->shoot_by_ai);
-        virtual_user_remote->key_middle = max_data(1.0f, virtual_user_remote->key_middle);
+        virtual_user_remote->shoot_by_ai   = max_data(1.0f, virtual_user_remote->shoot_by_ai);
+        virtual_user_remote->key_middle    = max_data(1.0f, virtual_user_remote->key_middle);
+
         for (uint8_t key_num = 0; key_num < 14; key_num++) {
             virtual_user_remote->custom_key[key_num] = max_data(1.0f, virtual_user_remote->custom_key[key_num]);
         }
@@ -65,7 +68,7 @@ void Mech_Operating_Config(void) {
     }else {
         user_time_counyer = 0 ;
     }
-
+    data_fusion();
     //配置执行函数
     virtual_user_remote->remote_config(virtual_user_remote);
 }
