@@ -53,15 +53,15 @@ void ZhouZishun_Config(USER_REMOTE* my_remote) {
           shoot_heat -= 10 ;
         }
       }
-      if (user_holder_data.key_back == 1) {
+      if (virtual_user_remote.custom_key[2] == 1) {
         if (user_time_counyer % 1000 == 0) {
           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) + 1296.0f));
         }
       }
     }
 
-    if (user_holder_data.key_mode == 0){
-      if (virtual_user_remote.shoot_by_user == 1 && user_holder_data.key_back == 1) {
+    if (virtual_user_remote.control_mode == 0){
+      if (virtual_user_remote.shoot_by_user == 1 && virtual_user_remote.custom_key[2] == 1) {
         DJI_Motor_Set_State(&RW_M3508, 2000);
         DJI_Motor_Set_State(&LW_M3508, -2000);
         if (time_counyer(50)) {
@@ -79,7 +79,7 @@ void ZhouZishun_Config(USER_REMOTE* my_remote) {
     char angle_data_tail[2] = { 0x90 , 0xEB };
     angle_z[0] = angle_data_head[0];
     angle_z[1] = angle_data_head[1];
-    const float inv_angle_z = user_holder_data.angle_z;
+    const float inv_angle_z = user_HWT906_chassis.user_angle.angle_z;
     angle_z[2] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 0);
     angle_z[3] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 8);
     angle_z[4] = (uint8_t) ((*(uint32_t*)&inv_angle_z) >> 16);
