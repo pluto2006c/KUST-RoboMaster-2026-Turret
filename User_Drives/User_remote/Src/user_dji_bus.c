@@ -11,10 +11,10 @@ static uint8_t dbus_buf[DBUS_BUF_LEN];
 
 
 static void DJI_Bus_Process(USER_REMOTE* user_remote) {
-    user_remote->chassis_x = dbus_drive->ch0 ;
-    user_remote->chassis_y = dbus_drive->ch1 ;
-    user_remote->yaw       = dbus_drive->ch2 ;
-    user_remote->pitch     = dbus_drive->ch3 ;
+    user_remote->chassis_x = dbus_drive->ch3 ;
+    user_remote->chassis_y = dbus_drive->ch2 ;
+    user_remote->yaw       = dbus_drive->ch0 ;
+    user_remote->pitch     = dbus_drive->ch1;
     user_remote->wheel     = dbus_drive->roll;
     user_remote->custom_key[1] = dbus_drive->sw1;
     user_remote->custom_key[2] = dbus_drive->sw2;

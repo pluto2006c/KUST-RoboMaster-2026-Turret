@@ -66,6 +66,7 @@ extern DJI_MOTOR_DRIVES PICH_GM6020;
 //遥控器注册
 extern UART_DRIVES vt03_uart;
 extern VT03_DRIVES user_vt03;
+extern DBUS_DRIVES dji_user_dbus;
 
 //陀螺仪注册
 extern UART_DRIVES hwt906_uart_chassis;

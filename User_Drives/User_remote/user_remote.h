@@ -18,13 +18,13 @@ typedef void(*controller_config)(void);
 
 typedef struct {
     controller_config remote_config;
-    uint16_t chassis_x;
-    uint16_t chassis_y;
-    uint16_t yaw;
-    uint16_t pitch;
-    uint16_t wheel;
-    uint16_t shoot_by_user;
-    uint16_t shoot_by_ai;
+    int16_t chassis_x;
+    int16_t chassis_y;
+    int16_t yaw;
+    int16_t pitch;
+    int16_t wheel;
+    int16_t shoot_by_user;
+    int16_t shoot_by_ai;
     uint8_t control_mode;//0-手动射击 1-保险关闭（可调整摩擦轮启停） 2-自动模式
     uint8_t key_middle;//仅针对能读取鼠标的相关外设需要实现（一般用于启停摩擦轮，可通过其他方式实现）
     uint8_t custom_key[14] ;//此为自定义按键，不同外设对应按键不同

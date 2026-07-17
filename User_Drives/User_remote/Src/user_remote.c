@@ -22,6 +22,19 @@ static float max_data(float max , float user_data) {
 }
 
 static void data_fusion(void) {
+    user_remote->chassis_x = 0;
+    user_remote->chassis_y = 0;
+    user_remote->yaw = 0;
+    user_remote->pitch = 0;
+    user_remote->wheel = 0;
+    user_remote->shoot_by_user = 0;
+    user_remote->shoot_by_ai = 0;
+    user_remote->control_mode = 0;
+    user_remote->key_middle = 0;
+    for (uint8_t key_num = 0; key_num < 14; key_num++) {
+        user_remote->custom_key[key_num] = 0;
+    }
+
     for (uint8_t remote_num = 0; remote_num < user_device_remote_num; remote_num++) {
         user_remote->chassis_x += user_device_remote[remote_num].chassis_x;
         user_remote->chassis_y += user_device_remote[remote_num].chassis_y;
@@ -34,7 +47,7 @@ static void data_fusion(void) {
         user_remote->key_middle += user_device_remote[remote_num].key_middle;
 
         for (uint8_t key_num = 0; key_num < 14; key_num++) {
-            user_remote->custom_key[key_num] += user_device_remote->custom_key[key_num];
+            user_remote->custom_key[key_num] += user_device_remote[remote_num].custom_key[key_num];
         }
 
         user_remote->chassis_x = max_data(660.0f, user_remote->chassis_x);
@@ -58,6 +71,7 @@ void user_remote_init(USER_REMOTE* my_remote ,const controller_config tatol_cont
     user_time_counyer = 0 ;
     //配置热量管理
     shoot_heat = 0 ;
+    user_remote = my_remote;
 }
 
 void Mech_Operating_Config(void) {

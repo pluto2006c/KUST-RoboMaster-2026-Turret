@@ -61,6 +61,7 @@ DJI_MOTOR_DRIVES PICH_GM6020 = {0};
 //遥控器注册
 UART_DRIVES vt03_uart = {0};
 VT03_DRIVES user_vt03 = {0};
+DBUS_DRIVES dji_user_dbus = {0};
 
 //陀螺仪注册
 

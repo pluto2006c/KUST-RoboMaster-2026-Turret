@@ -1,7 +1,7 @@
 #此文件从模板自动生成! 请勿更改!
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_VERSION 1)
-cmake_minimum_required(VERSION 4.1)
+cmake_minimum_required(VERSION 4.2)
 
 # specify cross-compilers and tools
 set(CMAKE_C_COMPILER arm-none-eabi-gcc)
@@ -55,13 +55,7 @@ add_definitions(-DDEBUG -DUSE_HAL_DRIVER -DSTM32F427xx -DARM_MATH_CM4 -D__FPU_PR
 
 file(GLOB_RECURSE SOURCES "User_Drives/*.*" "User_Algorithm/*.*" "User_Status/*.*" "User_Architect/*.*" "User_Application/*.*" "SEGGER_RTT/*.*" "User_Lib/*.*" "Core/*.*" "Drivers/*.*")
 
-set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F427IIHX_FLASH.ld
-        User_Drives/User_remote/user_remote.h
-        User_Drives/User_remote/Src/user_remote.c
-        User_Drives/Controller_config/ZhouZishun.h
-        User_Drives/Controller_config/Src/ZhouZishun.c
-        User_Drives/Controller_config/Src/Configuration_Common_Function_Table.c
-        User_Drives/Controller_config/Configuration_Common_Function_Table.h)
+set(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/STM32F427IIHX_FLASH.ld)
 
 add_link_options(-Wl,-gc-sections,--print-memory-usage,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map)
 add_link_options(-mcpu=cortex-m4 -mthumb -mthumb-interwork)

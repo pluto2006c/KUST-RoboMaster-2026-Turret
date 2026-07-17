@@ -47,6 +47,7 @@ CAN_HandleTypeDef hcan2;
 
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim12;
+TIM_HandleTypeDef htim14;
 
 UART_HandleTypeDef huart7;
 UART_HandleTypeDef huart8;
@@ -79,6 +80,7 @@ static void MX_USART3_UART_Init(void);
 static void MX_UART7_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_UART8_Init(void);
+static void MX_TIM14_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -127,6 +129,7 @@ int main(void)
   MX_UART7_Init();
   MX_USART6_UART_Init();
   MX_UART8_Init();
+  MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
   JScope_Init(&htim2);
 
@@ -147,6 +150,7 @@ int main(void)
 
   //vt03初始化
   DJI_VT03_Init(&user_vt03 , &vt03_uart);
+  DBUS_Init(&dji_user_dbus , &huart1);
 
 
 
@@ -406,6 +410,37 @@ static void MX_TIM12_Init(void)
 }
 
 /**
+  * @brief TIM14 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM14_Init(void)
+{
+
+  /* USER CODE BEGIN TIM14_Init 0 */
+
+  /* USER CODE END TIM14_Init 0 */
+
+  /* USER CODE BEGIN TIM14_Init 1 */
+
+  /* USER CODE END TIM14_Init 1 */
+  htim14.Instance = TIM14;
+  htim14.Init.Prescaler = 0;
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim14.Init.Period = 65535;
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM14_Init 2 */
+
+  /* USER CODE END TIM14_Init 2 */
+
+}
+
+/**
   * @brief UART7 Initialization Function
   * @param None
   * @retval None
@@ -577,8 +612,8 @@ static void MX_DMA_Init(void)
 {
 
   /* DMA controller clock enable */
-  __HAL_RCC_DMA2_CLK_ENABLE();
   __HAL_RCC_DMA1_CLK_ENABLE();
+  __HAL_RCC_DMA2_CLK_ENABLE();
 
   /* DMA interrupt init */
   /* DMA1_Stream0_IRQn interrupt configuration */
