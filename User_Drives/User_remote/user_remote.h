@@ -2,13 +2,10 @@
 #define DJI_A_BOARD_USER_REMOTE_H
 /*实体遥控器引入-----------------------------------------------------*/
 
-#include "../../User_remote/PC_communication.h"
+#include "../../User_Drives/User_remote/PC_communication.h"
 #include "../../User_Drives/User_remote/user_dji_bus.h"
 #include "../../User_Drives/User_remote/user_dji_vt03.h"
 
-/*用户配置导入-----------------------------------------------------*/
-
-#include "../../User_Drives/Controller_config/ZhouZishun.h"
 
 /*遥控器最大数量声明-------------------------------------------------*/
 
@@ -17,7 +14,7 @@
 
 /* 类型定义 ------------------------------------------------------------------*/
 
-typedef void(*controller_config)(void* controler_remote);
+typedef void(*controller_config)(void);
 
 typedef struct {
     controller_config remote_config;
@@ -32,6 +29,10 @@ typedef struct {
     uint8_t key_middle;//仅针对能读取鼠标的相关外设需要实现（一般用于启停摩擦轮，可通过其他方式实现）
     uint8_t custom_key[14] ;//此为自定义按键，不同外设对应按键不同
 }USER_REMOTE;
+
+/*用户配置导入-----------------------------------------------------*/
+
+#include "../../User_Drives/Controller_config/ZhouZishun.h"
 
 
 /* 函数声明 ------------------------------------------------------------------*/

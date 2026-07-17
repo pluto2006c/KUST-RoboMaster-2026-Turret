@@ -154,7 +154,7 @@ int main(void)
   PC_Init(&user_PC , &PC_uart);
 
   //遥控器初始化
-  user_remote_init(virtual_user_remote,ZhouZishun_Config);
+  user_remote_init(&virtual_user_remote,ZhouZishun_Config);
 
 
   PID_Init(&TP_M2006_Controller , 10.0f, 0.0f, 400.0f ,10000 ,0);

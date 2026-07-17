@@ -1,7 +1,8 @@
 #include "../../User_Drives/Controller_config/ZhouZishun.h"
 #include "bsp.h"
 
-void ZhouZishun_Config(USER_REMOTE* my_remote) {
+void ZhouZishun_Config(void) {
+
   can_RX_callback(&user_can_2);
   //PICH轴控制
   DJI_Motor_Set_State(&PICH_GM6020,  (float)virtual_user_remote.pitch);

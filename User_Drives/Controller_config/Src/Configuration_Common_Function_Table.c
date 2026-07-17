@@ -1,6 +1,9 @@
 #include "../../User_Drives/Controller_config/Configuration_Common_Function_Table.h"
 #include "bsp.h"
 
+int user_time_counyer = 0 ;
+float shoot_heat = 0 ;
+
 int time_counyer(int time) {
     if (user_time_counyer % time != 0) {
         return false;
