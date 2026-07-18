@@ -13,10 +13,10 @@
 /*类型定义------------------------------------------*/
 
 typedef struct {
-    UART_DRIVES *user_uart;
-    float holder_pitch;
-    float holder_yaw;
-    uint16_t shoot_delay;
+    UART_DRIVES *user_uart;   /* UART 驱动结构体指针 */
+    float holder_pitch;       /* 云台俯仰角 */
+    float holder_yaw;         /* 云台偏航角 */
+    uint16_t shoot_delay;     /* 射击延迟时间 */
 }PC_DRIVES;
 
 /*函数声明------------------------------------------*/

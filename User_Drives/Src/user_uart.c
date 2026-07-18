@@ -142,6 +142,10 @@ uint16_t UART_GetDataWithH(UART_DRIVES* user_uart, uint8_t *data, const char *he
 
 /* 覆写中断回调函数 -----------------------------------------------------------*/
 
+/**
+ * @brief UART 发送完成回调函数
+ * @param huart UART 硬件句柄
+ */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     for (uint8_t uart_index = 0; uart_index < uart_num; uart_index++) {
         UART_DRIVES *uart = uart_drives[uart_index];
@@ -158,6 +162,11 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 }
 
 
+/**
+ * @brief UART 接收事件回调函数（空闲中断 + DMA）
+ * @param huart UART 硬件句柄
+ * @param Size  接收到的数据长度
+ */
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size) {
     for (uint8_t uart_index = 0; uart_index < uart_num; uart_index++) {
         UART_DRIVES *uart = uart_drives[uart_index];

@@ -12,6 +12,13 @@ uint8_t user_device_remote_num = 0;
 static USER_REMOTE* user_remote = NULL;
 
 /* 函数体 --------------------------------------------------------------------*/
+
+/**
+ * @brief 数据限幅函数
+ * @param max       最大值
+ * @param user_data 待限幅数据
+ * @return 限幅后的数据
+ */
 static float max_data(float max , float user_data) {
     if (user_data >= max) {
         user_data = max;
@@ -21,6 +28,10 @@ static float max_data(float max , float user_data) {
     return user_data;
 }
 
+/**
+ * @brief 遥控器数据融合
+ * @note  将所有遥控器输入进行求和并限幅，生成最终控制量
+ */
 static void data_fusion(void) {
     user_remote->chassis_x = 0;
     user_remote->chassis_y = 0;
@@ -65,6 +76,11 @@ static void data_fusion(void) {
     }
 }
 
+/**
+ * @brief 初始化用户遥控器
+ * @param my_remote               用户遥控器结构体指针
+ * @param tatol_controller_config  控制器配置函数
+ */
 void user_remote_init(USER_REMOTE* my_remote ,const controller_config tatol_controller_config) {
     my_remote->remote_config = tatol_controller_config;
     //配置软件定时器
@@ -74,6 +90,10 @@ void user_remote_init(USER_REMOTE* my_remote ,const controller_config tatol_cont
     user_remote = my_remote;
 }
 
+/**
+ * @brief 机械操作配置函数
+ * @note  该函数应在滴答中断中调用，负责软件计时和数据融合
+ */
 void Mech_Operating_Config(void) {
 
     //软件计时器

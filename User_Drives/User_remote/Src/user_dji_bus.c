@@ -9,7 +9,10 @@ static uint8_t dbus_buf[DBUS_BUF_LEN];
 
 /* 私有函数 ------------------------------------------------------------------*/
 
-
+/**
+ * @brief DJI 遥控器数据映射函数
+ * @param user_remote 虚拟遥控器数据结构体指针
+ */
 static void DJI_Bus_Process(USER_REMOTE* user_remote) {
     user_remote->chassis_x = dbus_drive->ch3 ;
     user_remote->chassis_y = dbus_drive->ch2 ;

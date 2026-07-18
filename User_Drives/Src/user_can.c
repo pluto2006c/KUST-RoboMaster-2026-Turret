@@ -79,6 +79,12 @@ void CAN_Send(const CAN_DRIVES* user_can, const uint32_t id, const uint8_t *data
 
 
 /* 覆写中断回调函数 -----------------------------------------------------------*/
+
+/**
+ * @brief CAN 接收 FIFO0 消息挂起回调函数
+ * @param hcan CAN 硬件句柄
+ * @note  HAL 库中断回调函数，自动调用已注册的用户回调
+ */
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan) {
     for (uint8_t can_index = 0 ; can_index < can_num ; can_index++) {
         CAN_DRIVES* can_drive = can_drives[can_index];

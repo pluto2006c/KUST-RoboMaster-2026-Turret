@@ -54,6 +54,12 @@ static void VT03_UartCallback(void* user_uart);
 
 /* 函数体 --------------------------------------------------------------------*/
 
+/**
+ * @brief 数据限幅函数
+ * @param max       最大值
+ * @param user_data 待限幅数据
+ * @return 限幅后的数据
+ */
 static float max_data(float max , float user_data) {
 	if (user_data >= max) {
 		user_data = max;

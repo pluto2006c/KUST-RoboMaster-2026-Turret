@@ -1,6 +1,13 @@
+/* 包含头文件 ----------------------------------------------------------------*/
 #include "../../User_Drives/Controller_config/ZhouZishun.h"
 #include "bsp.h"
 
+/* 函数体 --------------------------------------------------------------------*/
+
+/**
+ * @brief 周子顺控制器配置
+ * @note  该函数负责处理云台控制、发射机构控制和热量管理
+ */
 void ZhouZishun_Config(void) {
 
   can_RX_callback(&user_can_2);
@@ -74,6 +81,50 @@ void ZhouZishun_Config(void) {
       }
     }
   }
+
+  if (user_time_counyer % 2) {
+    uint8_t user_can_2_send_frame_1[8] = {0};
+
+    user_can_2_send_frame_1 [0] = (uint8_t) (virtual_user_remote.wheel >> 0);
+    user_can_2_send_frame_1 [1] = (uint8_t) (virtual_user_remote.wheel >> 8);
+    user_can_2_send_frame_1 [2] = (uint8_t) (virtual_user_remote.yaw  >> 0);
+    user_can_2_send_frame_1 [3] = (uint8_t) (virtual_user_remote.yaw  >> 8);
+    user_can_2_send_frame_1 [4] = (uint8_t) (virtual_user_remote.chassis_x >> 0);
+    user_can_2_send_frame_1 [5] = (uint8_t) (virtual_user_remote.chassis_x >> 8);
+    user_can_2_send_frame_1 [6] = (uint8_t) (virtual_user_remote.chassis_y >> 0);
+    user_can_2_send_frame_1 [7] = (uint8_t) (virtual_user_remote.chassis_y >> 8);
+
+    CAN_Send(&user_can_2, Chassis_data_ID_1 , user_can_2_send_frame_1, 8);
+
+    uint8_t user_can_2_send_frame_2[8] = {0};
+
+    user_can_2_send_frame_2 [0] = (uint8_t) (virtual_user_remote.wheel >> 0);
+    user_can_2_send_frame_2 [1] = (uint8_t) (virtual_user_remote.wheel >> 8);
+    user_can_2_send_frame_2 [2] = (uint8_t) (virtual_user_remote.yaw  >> 0);
+    user_can_2_send_frame_2 [3] = (uint8_t) (virtual_user_remote.yaw  >> 8);
+    user_can_2_send_frame_2 [4] = (uint8_t) ((int16_t)((float)virtual_user_remote.chassis_x/660*1200) >> 0);
+    user_can_2_send_frame_2 [5] = (uint8_t) ((int16_t)((float)virtual_user_remote.chassis_x/660*1200) >> 8);
+    user_can_2_send_frame_2 [6] = (uint8_t) ((int16_t)((float)virtual_user_remote.chassis_y/660*1200) >> 0);
+    user_can_2_send_frame_2 [7] = (uint8_t) ((int16_t)((float)virtual_user_remote.chassis_y/660*1200) >> 8);
+
+    CAN_Send(&user_can_2, Chassis_data_ID_2 , user_can_2_send_frame_2, 8);
+
+    virtual_user_remote.yaw = 0 ;
+
+    uint8_t user_can_2_send_frame_3[8] = {0};
+
+    user_can_2_send_frame_3 [0] = (uint8_t) ((uint16_t)((float)user_HWT906_chassis.user_angle.angle_z * 100.0f) >> 0);
+    user_can_2_send_frame_3 [1] = (uint8_t) ((uint16_t)((float)user_HWT906_chassis.user_angle.angle_z * 100.0f) >> 8);
+    user_can_2_send_frame_3 [2] = 0;
+    user_can_2_send_frame_3 [3] = 0;
+    user_can_2_send_frame_3 [4] = 0;
+    user_can_2_send_frame_3 [5] = 0;
+    user_can_2_send_frame_3 [6] = 0;
+    user_can_2_send_frame_3 [7] = 0;
+
+    CAN_Send(&user_can_2, Chassis_data_ID_3 , user_can_2_send_frame_3, 8);
+  }
+
   if (user_delay(49999)) {
     char angle_z[8] = {0};
     char angle_data_head[2] = { 0xEB , 0x90 };

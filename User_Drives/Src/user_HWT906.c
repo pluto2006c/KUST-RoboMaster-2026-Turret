@@ -70,6 +70,10 @@ static void HWT906_UartCallback(void* user_uart) {
     }
 }
 
+/**
+ * @brief HWT906 控制函数（预留）
+ * @param User_HWT906 HWT906 驱动结构体指针
+ */
 void HWT906_Control(HWT906_DRIVES* User_HWT906) {
 
 }

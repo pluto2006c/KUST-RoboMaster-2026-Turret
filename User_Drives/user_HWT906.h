@@ -42,11 +42,11 @@ typedef struct {
 } HWT906_DRIVES;
 
 typedef enum {
-    hwt906_time              = 0x50 ,
-    hwt906_acceleration      = 0x51 ,
-    hwt906_angular_velocity  = 0x52 ,
-    hwt906_angle             = 0x53 ,
-}HWT906_TYPE ;
+    hwt906_time              = 0x50,  // 时间数据包
+    hwt906_acceleration      = 0x51,  // 加速度数据包
+    hwt906_angular_velocity  = 0x52,  // 角速度数据包
+    hwt906_angle             = 0x53,  // 角度数据包
+} HWT906_TYPE;
 
 
 
