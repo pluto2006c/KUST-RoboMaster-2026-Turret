@@ -29,50 +29,41 @@ static float max_data(float max , float user_data) {
 }
 
 /**
- * @brief 遥控器数据融合
- * @note  将所有遥控器输入进行求和并限幅，生成最终控制量
+ * @brief 遍历所有遥控器，对指定字段累加并限幅
+ * @param first     首地址
+ * @param count     遥控器数量
+ * @param stride    结构体大小（步长）
+ * @param elem_size 元素大小（1 或 2）
+ * @param max       限幅最大值
  */
-static void data_fusion(void) {
-    user_remote->chassis_x = 0;
-    user_remote->chassis_y = 0;
-    user_remote->yaw = 0;
-    user_remote->pitch = 0;
-    user_remote->wheel = 0;
-    user_remote->shoot_by_user = 0;
-    user_remote->shoot_by_ai = 0;
-    user_remote->control_mode = 0;
-    user_remote->key_middle = 0;
-    for (uint8_t key_num = 0; key_num < 14; key_num++) {
-        user_remote->custom_key[key_num] = 0;
+static int16_t remote_data_sum(const void *first, uint8_t count,uint8_t stride, uint8_t elem_size, float max) {
+    int16_t total = 0;
+    const uint8_t *p = (const uint8_t *)first;
+    for (uint8_t i = 0; i < count; i++) {
+        int16_t val = (elem_size == 1) ? (int16_t)(*p) : *(const int16_t *)p;
+        total = (int16_t)max_data(max, (float)(total + val));
+        p += stride;
     }
+    return total;
+}
 
-    for (uint8_t remote_num = 0; remote_num < user_device_remote_num; remote_num++) {
-        user_remote->chassis_x += user_device_remote[remote_num].chassis_x;
-        user_remote->chassis_y += user_device_remote[remote_num].chassis_y;
-        user_remote->yaw += user_device_remote[remote_num].yaw;
-        user_remote->pitch += user_device_remote[remote_num].pitch;
-        user_remote->wheel += user_device_remote[remote_num].wheel;
-        user_remote->shoot_by_user += user_device_remote[remote_num].shoot_by_user;
-        user_remote->shoot_by_ai += user_device_remote[remote_num].shoot_by_ai;
-        user_remote->control_mode = user_device_remote[remote_num].control_mode;
-        user_remote->key_middle += user_device_remote[remote_num].key_middle;
+#define REMOTE_SUM(member, max_val) \
+remote_data_sum(&user_device_remote[0].member, user_device_remote_num, \
+sizeof(USER_REMOTE), sizeof(user_device_remote[0].member), max_val)
 
-        for (uint8_t key_num = 0; key_num < 14; key_num++) {
-            user_remote->custom_key[key_num] += user_device_remote[remote_num].custom_key[key_num];
-        }
+static void data_fusion(void) {
+    user_remote->chassis_x     = REMOTE_SUM(chassis_x,     660.0f);
+    user_remote->chassis_y     = REMOTE_SUM(chassis_y,     660.0f);
+    user_remote->yaw           = REMOTE_SUM(yaw,           660.0f);
+    user_remote->pitch         = REMOTE_SUM(pitch,         660.0f);
+    user_remote->wheel         = REMOTE_SUM(wheel,         660.0f);
+    user_remote->shoot_by_user = REMOTE_SUM(shoot_by_user, 1.0f);
+    user_remote->shoot_by_ai   = REMOTE_SUM(shoot_by_ai,   1.0f);
+    user_remote->key_middle    = REMOTE_SUM(key_middle,    1.0f);
+    user_remote->control_mode  = user_device_remote[0].control_mode;
 
-        user_remote->chassis_x = max_data(660.0f, user_remote->chassis_x);
-        user_remote->chassis_y = max_data(660.0f, user_remote->chassis_y);
-        user_remote->yaw       = max_data(660.0f, user_remote->yaw);
-        user_remote->pitch     = max_data(660.0f, user_remote->pitch);
-        user_remote->wheel     = max_data(660.0f, user_remote->wheel);
-        user_remote->shoot_by_user = max_data(1.0f, user_remote->shoot_by_user);
-        user_remote->shoot_by_ai   = max_data(1.0f, user_remote->shoot_by_ai);
-        user_remote->key_middle    = max_data(1.0f, user_remote->key_middle);
-
-        for (uint8_t key_num = 0; key_num < 14; key_num++) {
-            user_remote->custom_key[key_num] = max_data(1.0f, user_remote->custom_key[key_num]);
-        }
+    for (uint8_t key_num = 0; key_num < 14; key_num++) {
+        user_remote->custom_key[key_num] = REMOTE_SUM(custom_key[key_num], 1.0f);
     }
 }
 
