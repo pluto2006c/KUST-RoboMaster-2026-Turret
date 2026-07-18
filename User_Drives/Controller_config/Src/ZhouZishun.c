@@ -82,6 +82,8 @@ void ZhouZishun_Config(void) {
     }
   }
 
+  DJI_Motor_Execute(&user_can_1);
+
   if (user_time_counyer % 2) {
     uint8_t user_can_2_send_frame_1[8] = {0};
 
