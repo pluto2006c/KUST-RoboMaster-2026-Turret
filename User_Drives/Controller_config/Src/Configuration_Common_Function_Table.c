@@ -59,8 +59,23 @@ void shoot_heat_reset(float max_shoot_heat,int Reset_Interval,float Reset_num){
  */
 int shoot_heat_control() {
     //热量判断
-    if (shoot_heat <=0)
+    if (shoot_heat <=9)
         return false;
     shoot_heat -= 10;
     return true;
+}
+
+/**
+ * @brief 数据限幅函数
+ * @param max       最大值
+ * @param user_data 待限幅数据
+ * @return 限幅后的数据
+ */
+float max_value(float max , float user_data) {
+    if (user_data >= max) {
+        user_data = max;
+    } else if (user_data <= -max) {
+        user_data = -max;
+    }
+    return user_data;
 }

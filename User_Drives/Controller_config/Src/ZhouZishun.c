@@ -12,7 +12,11 @@ void ZhouZishun_Config(void) {
 
   can_RX_callback(&user_can_2);
   //PICH轴控制
-  DJI_Motor_Set_State(&PICH_GM6020,  (float)virtual_user_remote.pitch);
+  static float pitch_angle = 0;
+  pitch_angle += 0.0005*(float)virtual_user_remote.pitch;
+  pitch_angle = max_value(75.0f , pitch_angle);
+  DJI_Motor_Set_State(&PICH_GM6020,  pitch_angle);
+  shoot_heat_reset(80,100,10);
 
 
   //模式控制
@@ -40,8 +44,8 @@ void ZhouZishun_Config(void) {
   if (shoot_mode == 3) {
     //连发
     if (virtual_user_remote.control_mode == 1 || virtual_user_remote.control_mode == 2){
-      DJI_Motor_Set_State(&RW_M3508, 6300);
-      DJI_Motor_Set_State(&LW_M3508, -6300);
+      DJI_Motor_Set_State(&RW_M3508, 16000);
+      DJI_Motor_Set_State(&LW_M3508, -16000);
 
       //全自动连发
       if (virtual_user_remote.control_mode == 2  && shoot_heat_control()) {
@@ -54,9 +58,9 @@ void ZhouZishun_Config(void) {
         }
       }
 
-      if (virtual_user_remote.shoot_by_user) {
+      if (virtual_user_remote.shoot_by_user == 1) {
         //发射频率计时
-        if (user_time_counyer % 100 == 0 && shoot_heat >=  10 ) {
+        if (user_time_counyer % 100 == 0 && shoot_heat_control() ) {
           DJI_Motor_Set_State(&TP_M2006,(float)(DJI_Motor_Get_Angle(&TP_M2006) - 1296.0f));
           shoot_heat -= 10 ;
         }
@@ -84,11 +88,17 @@ void ZhouZishun_Config(void) {
 
   DJI_Motor_Execute(&user_can_1);
 
+  static int16_t chassis_w = 0;
+
+  if (virtual_user_remote.custom_key[0] == 1) {
+    chassis_w = virtual_user_remote.wheel;
+  }
+
   if (user_time_counyer % 2) {
     uint8_t user_can_2_send_frame_1[8] = {0};
 
-    user_can_2_send_frame_1 [0] = (uint8_t) (virtual_user_remote.wheel >> 0);
-    user_can_2_send_frame_1 [1] = (uint8_t) (virtual_user_remote.wheel >> 8);
+    user_can_2_send_frame_1 [0] = (uint8_t) (chassis_w >> 0);
+    user_can_2_send_frame_1 [1] = (uint8_t) (chassis_w >> 8);
     user_can_2_send_frame_1 [2] = (uint8_t) (virtual_user_remote.yaw  >> 0);
     user_can_2_send_frame_1 [3] = (uint8_t) (virtual_user_remote.yaw  >> 8);
     user_can_2_send_frame_1 [4] = (uint8_t) (virtual_user_remote.chassis_x >> 0);
@@ -100,8 +110,8 @@ void ZhouZishun_Config(void) {
 
     uint8_t user_can_2_send_frame_2[8] = {0};
 
-    user_can_2_send_frame_2 [0] = (uint8_t) (virtual_user_remote.wheel >> 0);
-    user_can_2_send_frame_2 [1] = (uint8_t) (virtual_user_remote.wheel >> 8);
+    user_can_2_send_frame_2 [0] = (uint8_t) (chassis_w >> 0);
+    user_can_2_send_frame_2 [1] = (uint8_t) (chassis_w >> 8);
     user_can_2_send_frame_2 [2] = (uint8_t) (virtual_user_remote.yaw  >> 0);
     user_can_2_send_frame_2 [3] = (uint8_t) (virtual_user_remote.yaw  >> 8);
     user_can_2_send_frame_2 [4] = (uint8_t) ((int16_t)((float)virtual_user_remote.chassis_x/660*1200) >> 0);

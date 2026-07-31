@@ -47,26 +47,6 @@ static int16_t remote_data_sum(const void *first, uint8_t count,uint8_t stride, 
     return total;
 }
 
-#define REMOTE_SUM(member, max_val) \
-remote_data_sum(&user_device_remote[0].member, user_device_remote_num, \
-sizeof(USER_REMOTE), sizeof(user_device_remote[0].member), max_val)
-
-static void data_fusion(void) {
-    user_remote->chassis_x     = REMOTE_SUM(chassis_x,     660.0f);
-    user_remote->chassis_y     = REMOTE_SUM(chassis_y,     660.0f);
-    user_remote->yaw           = REMOTE_SUM(yaw,           660.0f);
-    user_remote->pitch         = REMOTE_SUM(pitch,         660.0f);
-    user_remote->wheel         = REMOTE_SUM(wheel,         660.0f);
-    user_remote->shoot_by_user = REMOTE_SUM(shoot_by_user, 1.0f);
-    user_remote->shoot_by_ai   = REMOTE_SUM(shoot_by_ai,   1.0f);
-    user_remote->key_middle    = REMOTE_SUM(key_middle,    1.0f);
-    user_remote->control_mode  = user_device_remote[0].control_mode;
-
-    for (uint8_t key_num = 0; key_num < 14; key_num++) {
-        user_remote->custom_key[key_num] = REMOTE_SUM(custom_key[key_num], 1.0f);
-    }
-}
-
 /**
  * @brief 初始化用户遥控器
  * @param my_remote               用户遥控器结构体指针
@@ -81,18 +61,42 @@ void user_remote_init(USER_REMOTE* my_remote ,const controller_config tatol_cont
     user_remote = my_remote;
 }
 
+#define REMOTE_SUM(member, max_val) \
+remote_data_sum(&user_device_remote[0].member, user_device_remote_num, \
+sizeof(USER_REMOTE), sizeof(user_device_remote[0].member), max_val)
+
+static void data_fusion(void) {
+
+    user_remote->chassis_x     = REMOTE_SUM(chassis_x,     660.0f);
+    user_remote->chassis_y     = REMOTE_SUM(chassis_y,     660.0f);
+    user_remote->yaw           = REMOTE_SUM(yaw,           660.0f);
+    user_remote->pitch         = REMOTE_SUM(pitch,         660.0f);
+    user_remote->wheel         = REMOTE_SUM(wheel,         660.0f);
+    user_remote->shoot_by_user = REMOTE_SUM(shoot_by_user, 1.0f);
+    user_remote->shoot_by_ai   = REMOTE_SUM(shoot_by_ai,   1.0f);
+    user_remote->key_middle    = REMOTE_SUM(key_middle,    1.0f);
+    user_remote->control_mode  = REMOTE_SUM(control_mode,  2.0f);
+
+    for (uint8_t key_num = 0; key_num < 14; key_num++) {
+        user_remote->custom_key[key_num] = REMOTE_SUM(custom_key[key_num], 1.0f);
+    }
+}
+
+
+
 /**
  * @brief 机械操作配置函数
  * @note  该函数应在滴答中断中调用，负责软件计时和数据融合
  */
 void Mech_Operating_Config(void) {
-
     //软件计时器
     if (user_time_counyer <= 1000000) {
         user_time_counyer ++ ;
     }else {
         user_time_counyer = 0 ;
     }
+    // if (user_remote == NULL)
+    //     return;
     data_fusion();
     //配置执行函数
     user_remote->remote_config();

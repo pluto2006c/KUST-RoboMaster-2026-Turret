@@ -14,27 +14,48 @@ static uint8_t dbus_buf[DBUS_BUF_LEN];
  * @param user_remote 虚拟遥控器数据结构体指针
  */
 static void DJI_Bus_Process(USER_REMOTE* user_remote) {
-    user_remote->chassis_x = dbus_drive->ch3 ;
-    user_remote->chassis_y = dbus_drive->ch2 ;
+    user_remote->chassis_x = dbus_drive->ch2 ;
+    user_remote->chassis_y = dbus_drive->ch3 ;
     user_remote->yaw       = dbus_drive->ch0 ;
     user_remote->pitch     = dbus_drive->ch1;
     user_remote->wheel     = dbus_drive->roll;
-    user_remote->custom_key[1] = dbus_drive->sw1;
-    user_remote->custom_key[2] = dbus_drive->sw2;
-    if (dbus_drive->sw1 == 3 ) {
-        user_remote->control_mode = 1;
-        if (dbus_drive->sw2 == 1) {
-            user_remote->key_middle = 1;
-        }else {
-            user_remote->key_middle = 0;
-        }
-    }
+
     if (dbus_drive->sw1 == 1 ) {
+
+        if (dbus_drive->sw2 == 1) {
+            user_remote->shoot_by_user = 1;
+            user_remote->control_mode = 1;
+        }else {
+            user_remote->shoot_by_user = 0;
+        }
+        if (dbus_drive->sw2 == 2) {
+            user_remote->shoot_by_ai = 1;
+            user_remote->control_mode = 2;
+        }else {
+            user_remote->shoot_by_ai = 0;
+        }
+        if (dbus_drive->sw2 == 3) {
+            user_remote->control_mode = 0;
+        }
+    }else {
         user_remote->control_mode = 0;
     }
-    if (dbus_drive->sw1 == 2 ) {
-        user_remote->control_mode = 2;
+    if (dbus_drive->sw1 == 3 ) {
+
+        if (dbus_drive->sw2 == 1) {
+            user_remote->custom_key[0] = 1;
+        }else {
+            user_remote->custom_key[0] = 0;
+        }
+        if (dbus_drive->sw2 == 2) {
+            user_remote->custom_key[1] = 1;
+        }else {
+            user_remote->custom_key[1] = 0;
+        }
     }
+    // if (dbus_drive->sw1 == 2 ) {
+    //
+    // }
 }
 
 /**
